@@ -171,7 +171,7 @@ module ALUControl(FuncCode, ALUCtl, Opcode);
 					3'b101:
 						case (FuncCode[3]) // second bit funct7
 							1'b0:
-							  ALUCtl = `kSAIL_MICROARCHITECTURE_ALUCTL_6to0_SRLI; //7'b0000011; SRLI
+							  ALUCtl = `kSAIL_MICROARCHITECTURE_ALUCTL_6to0_SRLI; // 7'b0000011; SRLI
 							1'b1:
 							  ALUCtl = `kSAIL_MICROARCHITECTURE_ALUCTL_6to0_SRAI; // 7'b0000100; SRAI
 							default:
