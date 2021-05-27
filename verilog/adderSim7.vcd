@@ -1,0 +1,139 @@
+$version Yosys 0.9+4052 (git sha1 44520808, clang  -fPIC -Os) $end
+$date Mon May 24 19:50:24 2021 $end
+$scope module addersim $end
+$var wire 1 n1 addsubsel $end
+$var wire 1 n2 clk $end
+$var wire 32 n3 input1 $end
+$var wire 32 n4 input2 $end
+$var wire 32 n5 out $end
+$scope module adder_inst $end
+$var wire 1 n6 addsubsel $end
+$var wire 1 n7 ahold $end
+$var wire 1 n8 bhold $end
+$var wire 1 n9 ce $end
+$var wire 1 n10 chold $end
+$var wire 1 n11 ci $end
+$var wire 1 n12 clk $end
+$var wire 1 n13 co $end
+$var wire 1 n14 dhold $end
+$var wire 32 n15 input1 $end
+$var wire 32 n16 input2 $end
+$var wire 1 n17 irstbot $end
+$var wire 1 n18 irsttop $end
+$var wire 1 n19 oholdbot $end
+$var wire 1 n20 oholdtop $end
+$var wire 1 n21 oloadbot $end
+$var wire 1 n22 oloadtop $end
+$var wire 1 n23 orstbot $end
+$var wire 1 n24 orsttop $end
+$var wire 32 n25 out $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b00000000000000000000000000000000 n5
+b00000000000000000000000000000001 n4
+b00000000000000000000000000000001 n3
+bx n2
+b0 n1
+b00000000000000000000000000000000 n25
+b0 n24
+b0 n23
+b0 n22
+b0 n21
+b0 n20
+b0 n19
+b0 n18
+b0 n17
+b00000000000000000000000000000001 n16
+b00000000000000000000000000000001 n15
+b0 n14
+b0 n13
+b0 n12
+b0 n11
+b0 n10
+b1 n9
+b0 n8
+b0 n7
+b0 n6
+#5
+b0 n2
+#10
+b1 n2
+#15
+b0 n2
+#20
+b1 n2
+#25
+b0 n2
+#30
+b1 n2
+#35
+b0 n2
+#40
+b1 n2
+#45
+b0 n2
+#50
+b1 n2
+#55
+b0 n2
+#60
+b1 n2
+#65
+b0 n2
+#70
+b1 n2
+#75
+b0 n2
+#80
+b1 n2
+#85
+b0 n2
+#90
+b1 n2
+#95
+b0 n2
+#100
+b1 n2
+#105
+b0 n2
+#110
+b1 n2
+#115
+b0 n2
+#120
+b1 n2
+#125
+b0 n2
+#130
+b1 n2
+#135
+b0 n2
+#140
+b1 n2
+#145
+b0 n2
+#150
+b1 n2
+#155
+b0 n2
+#160
+b1 n2
+#165
+b0 n2
+#170
+b1 n2
+#175
+b0 n2
+#180
+b1 n2
+#185
+b0 n2
+#190
+b1 n2
+#195
+b0 n2
+#200
+b1 n2
+#202

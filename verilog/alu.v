@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-
+`include "sb_mac16_only.v" //simulation testing purposes
 
 
 /*
@@ -69,11 +69,32 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg [15:0] 		add_D;
    wire [31:0] 		add_O;
 
+   
    reg 			add_addsubtop; // 0 to add, 1 to sub
    reg 			add_addsubbot;
- 			
-   
 
+   reg [15:0]		add_C2;
+   reg [15:0]		add_A2;
+   reg [15:0]		add_B2;
+   reg [15:0]		add_D2;
+   wire [31:0]		add_O2; 
+
+   reg			xor_addsubtop; 
+   reg			xor_addsubbot;
+
+   // Default values for simulation purposes
+   reg			CE = 1;
+   reg			DEF = 0;
+
+   /*
+   // Discarding higher bits of B for SRL, SRA, and SLL operations.
+   reg	[4:0]		B_lowerfive;
+   reg	[32:0]		srl_out;
+   reg	[32:0]		sra_out;
+   reg	[32:0]		sll_out;
+   */
+
+   
    // Use DSP for addition, subtraction
    SB_MAC16 i_sbmac16_addsub
      (
@@ -83,9 +104,27 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       .D(add_D),
       .O(add_O),
       .CLK(clk),
+      .CE(CE),
+      .AHOLD(DEF),
+      .BHOLD(DEF),
+      .CHOLD(DEF),
+      .DHOLD(DEF),
+      .IRSTTOP(DEF),
+      .IRSTBOT(DEF),
+      .ORSTTOP(DEF),
+      .ORSTBOT(DEF),
       .ADDSUBTOP(add_addsubtop),
-      .ADDSUBBOT(add_addsubbot)
+      .ADDSUBBOT(add_addsubbot),
+      .OHOLDTOP(DEF),
+      .OHOLDBOT(DEF),
+      .OLOADTOP(DEF),
+      .OLOADBOT(DEF),
+      .CI(DEF),
+      .ACCUMCI(DEF),
+      .SIGNEXTIN(DEF)
       );
+
+
 
    // add_sub_32_bypassed_unsigned [24:0] = 001_0010000_1010000_0000_0000
    // Read configuration settings [24:0] from left to right while filling the
@@ -112,8 +151,59 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.B_REG = 1'b0;
    defparam i_sbmac16_addsub.A_REG = 1'b0;
    defparam i_sbmac16_addsub.C_REG = 1'b0;
-   
-   
+
+   // Second DSP block for top half of XOR and AND operations
+   SB_MAC16 xor_sb_mac16_inst
+   (
+	   .A(add_A2),
+	   .B(add_B2),
+	   .C(add_C2),
+	   .D(add_D2),
+	   .O(add_O2),
+	   .CLK(clk),
+	   .CE(CE),
+	   .AHOLD(DEF),
+	   .BHOLD(DEF),
+	   .CHOLD(DEF),
+	   .DHOLD(DEF),
+	   .IRSTTOP(DEF),
+	   .IRSTBOT(DEF),
+	   .ORSTTOP(DEF),
+	   .ORSTBOT(DEF),
+	   .ADDSUBTOP(xor_addsubtop),
+	   .ADDSUBBOT(xor_addsubbot),
+	   .OHOLDTOP(DEF),
+	   .OHOLDBOT(DEF),
+	   .OLOADTOP(DEF),
+	   .OLOADBOT(DEF),
+	   .CI(DEF),
+	   .ACCUMCI(DEF),
+	   .SIGNEXTIN(DEF)
+   );
+
+   defparam xor_sb_mac16_inst.B_SIGNED = 1'b0;
+   defparam xor_sb_mac16_inst.A_SIGNED = 1'b0;
+   defparam xor_sb_mac16_inst.MODE_8x8 = 1'b1;
+
+   defparam xor_sb_mac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
+   defparam xor_sb_mac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
+   defparam xor_sb_mac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
+   defparam xor_sb_mac16_inst.BOTOUTPUT_SELECT = 2'b00;
+
+   defparam xor_sb_mac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
+   defparam xor_sb_mac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
+   defparam xor_sb_mac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
+   defparam xor_sb_mac16_inst.TOPOUTPUT_SELECT = 2'b00;
+
+   defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
+   defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
+   defparam xor_sb_mac16_inst.BOT_8x8_MULT_REG = 1'b0;
+   defparam xor_sb_mac16_inst.TOP_8x8_MULT_REG = 1'b0;
+   defparam xor_sb_mac16_inst.D_REG = 1'b0;
+   defparam xor_sb_mac16_inst.B_REG = 1'b0;
+   defparam xor_sb_mac16_inst.A_REG = 1'b0;
+   defparam xor_sb_mac16_inst.C_REG = 1'b0;
+
    /*
     *	This uses Yosys's support for nonzero initial values:
     *
@@ -128,16 +218,45 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       Branch_Enable = 1'b0;
    end
 
-   always @(ALUctl, A, B) begin
-      // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
-      add_C <= A [31:16];
-      add_A <= B [31:16];
-      add_B <= A [15:0];
-      add_D <= B [15:0];
+   /*
+   always @(A, B_lowerfive) begin
+   	srl_out = A >> B_lowerfive;
+   	sra_out = A >>> B_lowerfive;
+   	sll_out = A << B_lowerfive;
+   end
+   */
+
+  /*
+   always @(ALUctl) begin
+	   if (ALUctl[3:0] == `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SUB) begin
+		   add_addsubtop <= 1;
+		   add_addsubbot <= 1;
+	   end
+	   else begin
+		   add_addsubtop <= 0;
+		   add_addsubbot <= 0;
+	   end
+   end
+*/
+
+   always @(clk, ALUctl, A, B, add_O) begin
+	   // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
+      add_C <= B [31:16];
+      add_A <= A [31:16];
+      add_B <= B [15:0];
+      add_D <= A [15:0];
       add_addsubtop <= 0;
       add_addsubbot <= 0;
-
+      //B_lowerfive <= B[4:0];
       
+      add_D2 <= {1'b0, A[23], 1'b0, A[22], 1'b0, A[21], 1'b0, A[20], 1'b0, A[19], 1'b0, A[18], 1'b0, A[17], 1'b0, A[16]};
+      add_A2 <= {1'b0, A[31], 1'b0, A[30], 1'b0, A[29], 1'b0, A[28], 1'b0, A[27], 1'b0, A[26], 1'b0, A[25], 1'b0, A[24]};
+      add_B2 <= {1'b0, B[23], 1'b0, B[22], 1'b0, B[21], 1'b0, B[20], 1'b0, B[19], 1'b0, B[18], 1'b0, B[17], 1'b0, B[16]};
+      add_C2 <= {1'b0, B[31], 1'b0, B[30], 1'b0, B[29], 1'b0, B[28], 1'b0, B[27], 1'b0, B[26], 1'b0, B[25], 1'b0, B[24]};
+
+      xor_addsubtop <= 0;
+      xor_addsubbot <= 0;
+
       case (ALUctl[3:0])
 	/*
 	 *	AND (the fields also match ANDI and LUI)
@@ -153,20 +272,27 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	 *	ADD (the fields also match AUIPC, all loads (inc. LW), all stores, and ADDI)
 	 */
 	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_ADD:       begin
-	                                                    add_addsubtop <= 0;
-	                                                    add_addsubbot <= 0;
-	     
-	                                                    ALUOut = add_O;
-	                                                end
+								add_addsubtop <= 0;
+								add_addsubtop <= 0;
+								add_C <= B [31:16];
+								add_A <= A [31:16];
+								add_B <= B [15:0];
+								add_D <= A [15:0];
+								ALUOut = add_O;
+							end
+
 	/*
 	 *	SUBTRACT (the fields also matches all branches)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SUB:       begin
-	                                                    add_addsubtop <= 1;
-	                                                    add_addsubbot <= 1;
-	     
-	                                                    ALUOut = add_O;
-	                                                end
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SUB:	begin	
+								add_addsubtop <= 1;
+								add_addsubbot <= 1;
+								add_C <= B [31:16];
+								add_A <= A [31:16];
+								add_B <= B [15:0];
+								add_D <= A [15:0];
+								ALUOut = add_O;
+							end
 
 	/*
 	 *	SLT (the fields also matches all the other SLT variants)
@@ -191,7 +317,21 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	/*
 	 *	XOR (the fields also match other XOR variants)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	ALUOut = A ^ B;
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
+		add_A <= {1'b0, A[15], 1'b0, A[14], 1'b0, A[13], 1'b0, A[12], 1'b0, A[11], 1'b0, A[10], 1'b0, A[9], 1'b0, A[8]};
+		add_B <= {1'b0, B[7], 1'b0, B[6], 1'b0, B[5], 1'b0, B[4], 1'b0, B[3], 1'b0, B[2], 1'b0, B[1], 1'b0, B[0]};
+		add_C <= {1'b0, B[15], 1'b0, B[14], 1'b0, B[13], 1'b0, B[12], 1'b0, B[11], 1'b0, B[10], 1'b0, B[9], 1'b0, B[8]};
+		ALUOut [15:0] <= {add_O[30], add_O[28], add_O[26], add_O[24], add_O[22], add_O[20], add_O[18], 
+			add_O[16], add_O[14], add_O[12], add_O[10], add_O[8], add_O[6], add_O[4], add_O[2],  
+					add_O[0]};
+		// Top half - using second DSP block
+		ALUOut [31:16] <= {add_O2[30], add_O2[28], add_O2[26], add_O2[24], add_O2[22], add_O2[20], add_O2[18],
+					add_O2[16], add_O2[14], add_O2[12], add_O2[10], add_O2[8], add_O2[6], add_O2[4], 
+					add_O2[2], add_O2[0]};
+	end
 
 	/*
 	 *	CSRRW  only
@@ -228,3 +368,4 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       endcase
    end
 endmodule
+

@@ -50,5 +50,50 @@ module adder(input1, input2, out);
 	input [31:0]	input2;
 	output [31:0]	out;
 
-	assign		out = input1 + input2;
+	// Used combinational (=) not sequential (<=) assignments - change if
+	// this causes issues.
+	reg[15:0]	add_C = input1[31:16];
+	reg[15:0]	add_A = input2[31:16];
+	reg[15:0]	add_B = input1[15:0];
+	reg[15:0]	add_D = input2[15:0];
+
+	reg		addsubtop = 0;
+	reg		addsubbot = 0;
+
+	SB_MAC16	sb_mac16_inst (
+		.A(add_A),
+		.B(add_B),
+		.C(add_C),
+		.D(add_D),
+		.O(out),
+		//.CLK(clk),	//add back in if needed - unregistered inputs
+		//and outputs so should not need clock input to DSP.
+		.ADDSUBTOP(addsubtop),
+		.ADDSUBBOT(addsubbot)
+	);
+
+	defparam sb_mac16_inst.B_SIGNED = 1'b0;
+	defparam sb_mac16_inst.A_SIGNED = 1'b0;
+	defparam sb_mac16_inst.MODE_8x8 = 1'b1;
+	
+	defparam sb_mac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
+	defparam sb_mac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
+	defparam sb_mac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
+	defparam sb_mac16_inst.BOTOUTPUT_SELECT = 2'b00;
+
+	defparam sb_mac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
+	defparam sb_mac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
+	defparam sb_mac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
+	defparam sb_mac16_inst.TOPOUTPUT_SELECT = 2'b00;
+	
+	defparam sb_mac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
+	defparam sb_mac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
+	defparam sb_mac16_inst.BOT_8x8_MULT_REG = 1'b0;
+	defparam sb_mac16_inst.TOP_8x8_MULT_REG = 1'b0;
+	defparam sb_mac16_inst.D_REG = 1'b0;
+	defparam sb_mac16_inst.B_REG = 1'b0;
+	defparam sb_mac16_inst.A_REG = 1'b0;
+	defparam sb_mac16_inst.C_REG = 1'b0;
+
+	//assign		out = input1 + input2;
 endmodule

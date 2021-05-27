@@ -1,0 +1,177 @@
+$version Yosys 0.9+4052 (git sha1 44520808, clang  -fPIC -Os) $end
+$date Sat May 22 15:29:55 2021 $end
+$scope module addersim $end
+$var wire 1 n1 clk $end
+$var wire 32 n2 input1 $end
+$var wire 32 n3 input2 $end
+$var wire 32 n4 out $end
+$scope module adder_inst $end
+$var wire 1 n5 addsubbot $end
+$var wire 1 n6 addsubtop $end
+$var wire 1 n7 ahold $end
+$var wire 1 n8 bhold $end
+$var wire 1 n9 ce $end
+$var wire 1 n10 chold $end
+$var wire 1 n11 ci $end
+$var wire 1 n12 clk $end
+$var wire 1 n13 dhold $end
+$var wire 32 n14 input1 $end
+$var wire 32 n15 input2 $end
+$var wire 1 n16 irstbot $end
+$var wire 1 n17 irsttop $end
+$var wire 1 n18 oholdbot $end
+$var wire 1 n19 oholdtop $end
+$var wire 1 n20 oloadbot $end
+$var wire 1 n21 oloadtop $end
+$var wire 1 n22 orstbot $end
+$var wire 1 n23 orsttop $end
+$var wire 32 n24 out $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx n4
+b00000000000000000000000000000001 n3
+b00000000000000000000000000000001 n2
+bx n1
+bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx n24
+b0 n23
+b0 n22
+b0 n21
+b0 n20
+b0 n19
+b0 n18
+b0 n17
+b0 n16
+b00000000000000000000000000000001 n15
+b00000000000000000000000000000001 n14
+b0 n13
+bx n12
+b0 n11
+b0 n10
+b1 n9
+b0 n8
+b0 n7
+b0 n6
+b0 n5
+#5
+b0 n1
+b0 n12
+#10
+b1 n1
+b1 n12
+#15
+b0 n1
+b0 n12
+#20
+b1 n1
+b1 n12
+#25
+b0 n1
+b0 n12
+#30
+b1 n1
+b1 n12
+#35
+b0 n1
+b0 n12
+#40
+b1 n1
+b1 n12
+#45
+b0 n1
+b0 n12
+#50
+b1 n1
+b1 n12
+#55
+b0 n1
+b0 n12
+#60
+b1 n1
+b1 n12
+#65
+b0 n1
+b0 n12
+#70
+b1 n1
+b1 n12
+#75
+b0 n1
+b0 n12
+#80
+b1 n1
+b1 n12
+#85
+b0 n1
+b0 n12
+#90
+b1 n1
+b1 n12
+#95
+b0 n1
+b0 n12
+#100
+b1 n1
+b1 n12
+#105
+b0 n1
+b0 n12
+#110
+b1 n1
+b1 n12
+#115
+b0 n1
+b0 n12
+#120
+b1 n1
+b1 n12
+#125
+b0 n1
+b0 n12
+#130
+b1 n1
+b1 n12
+#135
+b0 n1
+b0 n12
+#140
+b1 n1
+b1 n12
+#145
+b0 n1
+b0 n12
+#150
+b1 n1
+b1 n12
+#155
+b0 n1
+b0 n12
+#160
+b1 n1
+b1 n12
+#165
+b0 n1
+b0 n12
+#170
+b1 n1
+b1 n12
+#175
+b0 n1
+b0 n12
+#180
+b1 n1
+b1 n12
+#185
+b0 n1
+b0 n12
+#190
+b1 n1
+b1 n12
+#195
+b0 n1
+b0 n12
+#200
+b1 n1
+b1 n12
+#202

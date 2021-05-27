@@ -1,0 +1,279 @@
+$version Yosys 0.9+4052 (git sha1 44520808, clang  -fPIC -Os) $end
+$date Sat May 22 20:50:31 2021 $end
+$scope module addersim $end
+$var wire 1 n1 clk $end
+$var wire 32 n2 input1 $end
+$var wire 32 n3 input2 $end
+$var wire 32 n4 out $end
+$scope module adder_inst $end
+$var wire 1 n5 accumco $end
+$var wire 1 n6 addsubbot $end
+$var wire 1 n7 addsubtop $end
+$var wire 1 n8 ahold $end
+$var wire 1 n9 bhold $end
+$var wire 1 n10 ce $end
+$var wire 1 n11 chold $end
+$var wire 1 n12 ci $end
+$var wire 1 n13 clk $end
+$var wire 1 n14 co $end
+$var wire 1 n15 dhold $end
+$var wire 32 n16 input1 $end
+$var wire 32 n17 input2 $end
+$var wire 1 n18 irstbot $end
+$var wire 1 n19 irsttop $end
+$var wire 1 n20 oholdbot $end
+$var wire 1 n21 oholdtop $end
+$var wire 1 n22 oloadbot $end
+$var wire 1 n23 oloadtop $end
+$var wire 1 n24 orstbot $end
+$var wire 1 n25 orsttop $end
+$var wire 32 n26 out $end
+$var wire 1 n27 signextout $end
+$scope module SB_MAC16_inst $end
+$var wire 16 n28 A $end
+$var wire 1 n29 ACCUMCI $end
+$var wire 1 n30 ACCUMCO $end
+$var wire 1 n31 ADDSUBBOT $end
+$var wire 1 n32 ADDSUBTOP $end
+$var wire 1 n33 AHOLD $end
+$var wire 16 n34 B $end
+$var wire 1 n35 BHOLD $end
+$var wire 16 n36 C $end
+$var wire 1 n37 CE $end
+$var wire 1 n38 CHOLD $end
+$var wire 1 n39 CI $end
+$var wire 1 n40 CLK $end
+$var wire 1 n41 CO $end
+$var wire 16 n42 D $end
+$var wire 1 n43 DHOLD $end
+$var wire 1 n44 IRSTBOT $end
+$var wire 1 n45 IRSTTOP $end
+$var wire 32 n46 O $end
+$var wire 1 n47 OHOLDBOT $end
+$var wire 1 n48 OHOLDTOP $end
+$var wire 1 n49 OLOADBOT $end
+$var wire 1 n50 OLOADTOP $end
+$var wire 1 n51 ORSTBOT $end
+$var wire 1 n52 ORSTTOP $end
+$var wire 1 n53 SIGNEXTIN $end
+$var wire 1 n54 SIGNEXTOUT $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx n4
+b00000000000000000000000000000001 n3
+b00000000000000000000000000000001 n2
+bx n1
+bx n27
+bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx n26
+b0 n25
+b0 n24
+b0 n23
+b0 n22
+b0 n21
+b0 n20
+b0 n19
+b0 n18
+b00000000000000000000000000000001 n17
+b00000000000000000000000000000001 n16
+b0 n15
+bx n14
+bx n13
+b0 n12
+b0 n11
+b1 n10
+b0 n9
+b0 n8
+b0 n7
+b0 n6
+bx n5
+bx n54
+bx n53
+b0 n52
+b0 n51
+b0 n50
+b0 n49
+b0 n48
+b0 n47
+bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx n46
+b0 n45
+b0 n44
+b0 n43
+b0000000000000001 n42
+bx n41
+bx n40
+b0 n39
+b0 n38
+b1 n37
+b0000000000000000 n36
+b0 n35
+b0000000000000001 n34
+b0 n33
+b0 n32
+b0 n31
+bx n30
+bx n29
+b0000000000000000 n28
+#5
+b0 n1
+b0 n13
+b0 n40
+#10
+b1 n1
+b1 n13
+b1 n40
+#15
+b0 n1
+b0 n13
+b0 n40
+#20
+b1 n1
+b1 n13
+b1 n40
+#25
+b0 n1
+b0 n13
+b0 n40
+#30
+b1 n1
+b1 n13
+b1 n40
+#35
+b0 n1
+b0 n13
+b0 n40
+#40
+b1 n1
+b1 n13
+b1 n40
+#45
+b0 n1
+b0 n13
+b0 n40
+#50
+b1 n1
+b1 n13
+b1 n40
+#55
+b0 n1
+b0 n13
+b0 n40
+#60
+b1 n1
+b1 n13
+b1 n40
+#65
+b0 n1
+b0 n13
+b0 n40
+#70
+b1 n1
+b1 n13
+b1 n40
+#75
+b0 n1
+b0 n13
+b0 n40
+#80
+b1 n1
+b1 n13
+b1 n40
+#85
+b0 n1
+b0 n13
+b0 n40
+#90
+b1 n1
+b1 n13
+b1 n40
+#95
+b0 n1
+b0 n13
+b0 n40
+#100
+b1 n1
+b1 n13
+b1 n40
+#105
+b0 n1
+b0 n13
+b0 n40
+#110
+b1 n1
+b1 n13
+b1 n40
+#115
+b0 n1
+b0 n13
+b0 n40
+#120
+b1 n1
+b1 n13
+b1 n40
+#125
+b0 n1
+b0 n13
+b0 n40
+#130
+b1 n1
+b1 n13
+b1 n40
+#135
+b0 n1
+b0 n13
+b0 n40
+#140
+b1 n1
+b1 n13
+b1 n40
+#145
+b0 n1
+b0 n13
+b0 n40
+#150
+b1 n1
+b1 n13
+b1 n40
+#155
+b0 n1
+b0 n13
+b0 n40
+#160
+b1 n1
+b1 n13
+b1 n40
+#165
+b0 n1
+b0 n13
+b0 n40
+#170
+b1 n1
+b1 n13
+b1 n40
+#175
+b0 n1
+b0 n13
+b0 n40
+#180
+b1 n1
+b1 n13
+b1 n40
+#185
+b0 n1
+b0 n13
+b0 n40
+#190
+b1 n1
+b1 n13
+b1 n40
+#195
+b0 n1
+b0 n13
+b0 n40
+#200
+b1 n1
+b1 n13
+b1 n40
+#202
