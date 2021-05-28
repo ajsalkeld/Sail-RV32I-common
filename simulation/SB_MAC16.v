@@ -1,4 +1,4 @@
-`timescale 1ps / 1ps
+//`timescale 1ps / 1ps
 `define SB_DFF_REG reg Q = 0
 // `define SB_DFF_REG reg Q
 

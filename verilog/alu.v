@@ -72,7 +72,9 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg 			add_addsubtop; // 0 to add, 1 to sub
    reg 			add_addsubbot;
  			
-   
+   // Default values for simulation purposes
+   reg                  CE = 1;
+   reg                  DEF = 0;
 
    // Use DSP for addition, subtraction
    SB_MAC16 i_sbmac16_addsub
@@ -83,8 +85,24 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       .D(add_D),
       .O(add_O),
       .CLK(clk),
+      .CE(CE),
+      .AHOLD(DEF),
+      .BHOLD(DEF),
+      .CHOLD(DEF),
+      .DHOLD(DEF),
+      .IRSTTOP(DEF),
+      .IRSTBOT(DEF),
+      .ORSTTOP(DEF),
+      .ORSTBOT(DEF),
       .ADDSUBTOP(add_addsubtop),
-      .ADDSUBBOT(add_addsubbot)
+      .ADDSUBBOT(add_addsubbot),
+      .OHOLDTOP(DEF),
+      .OHOLDBOT(DEF),
+      .OLOADTOP(DEF),
+      .OLOADBOT(DEF),
+      .CI(DEF),
+      .ACCUMCI(DEF),
+      .SIGNEXTIN(DEF)
       );
 
    // add_sub_32_bypassed_unsigned [24:0] = 001_0010000_1010000_0000_0000
@@ -112,7 +130,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.B_REG = 1'b0;
    defparam i_sbmac16_addsub.A_REG = 1'b0;
    defparam i_sbmac16_addsub.C_REG = 1'b0;
-   
+
    
    /*
     *	This uses Yosys's support for nonzero initial values:
@@ -128,12 +146,12 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       Branch_Enable = 1'b0;
    end
 
-   always @(ALUctl, A, B) begin
+   always @(ALUctl, A, B, add_O) begin
       // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
-      add_C <= A [31:16];
-      add_A <= B [31:16];
-      add_B <= A [15:0];
-      add_D <= B [15:0];
+      add_A <= A [31:16];
+      add_C <= B [31:16];
+      add_D <= A [15:0];
+      add_B <= B [15:0];
       add_addsubtop <= 0;
       add_addsubbot <= 0;
 
@@ -155,6 +173,10 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_ADD:       begin
 	                                                    add_addsubtop <= 0;
 	                                                    add_addsubbot <= 0;
+	                                                    add_A <= A [31:16];
+                                                            add_C <= B [31:16];
+                                                            add_D <= A [15:0];
+	                                                    add_B <= B [15:0];
 	     
 	                                                    ALUOut = add_O;
 	                                                end
@@ -164,6 +186,10 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SUB:       begin
 	                                                    add_addsubtop <= 1;
 	                                                    add_addsubbot <= 1;
+	                                                    add_A <= A [31:16];
+                                                            add_C <= B [31:16];
+                                                            add_D <= A [15:0];
+	                                                    add_B <= B [15:0];
 	     
 	                                                    ALUOut = add_O;
 	                                                end
