@@ -118,6 +118,22 @@ initial begin
  	FuncCode = 4'b0100;
  	Opcode = 7'b0110011;
 
+	#5
+
+	//simulate SLL: result should be 100000 = h20
+	A = 32'b10;
+	B = 32'b10000;
+	FuncCode = 4'b0001;
+	Opcode = 7'b0110011;
+
+	#5
+
+	//simulate SLL: result should be 32 bits 1000...0
+	A = 32'b1;
+	B = 32'b11111;
+	FuncCode = 4'b0001;
+	Opcode = 7'b0110011;
+
  	#50
 
  	$finish;

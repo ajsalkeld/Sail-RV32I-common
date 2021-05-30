@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-`include "sb_mac16_only.v" //simulation testing purposes
+//`include "sb_mac16_only.v" //simulation testing purposes
 
 
 /*
@@ -72,16 +72,23 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    
    reg 			add_addsubtop; // 0 to add, 1 to sub
    reg 			add_addsubbot;
-
+   
    reg [15:0]		add_C2;
    reg [15:0]		add_A2;
    reg [15:0]		add_B2;
    reg [15:0]		add_D2;
    wire [31:0]		add_O2; 
-
-   reg			xor_addsubtop; 
-   reg			xor_addsubbot;
-
+   
+   /* Removing due to delays
+   reg [15:0]		xor_add_C;
+   reg [15:0]		xor_add_A;
+   reg [15:0]		xor_add_B;
+   reg [15:0]		xor_add_D;
+   */
+   
+   reg			xor_addsubtop = 0; 
+   reg			xor_addsubbot = 0;
+   
    // Default values for simulation purposes
    reg			CE = 1;
    reg			DEF = 0;
@@ -93,7 +100,25 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg	[32:0]		sra_out;
    reg	[32:0]		sll_out;
    */
+   
+   // Defining input registers for shift multipliers
+   reg [31:0]		sll_two_power_n;
+   
+   reg [15:0]		mult1_A;
+   reg [15:0]		mult1_B;
+   wire [31:0]		mult1_O;
+   
+   reg [15:0]		mult2_A;
+   reg [15:0]		mult2_B;
+   wire [31:0]		mult2_O;
 
+   reg [15:0]		mult3_A;
+   reg [15:0]		mult3_B;
+   wire [31:0]		mult3_O;
+
+   // For simulation
+   reg [15:0]		mult_C = 16'b0;
+   reg [15:0]		mult_D = 16'b0;
    
    // Use DSP for addition, subtraction
    SB_MAC16 i_sbmac16_addsub
@@ -152,7 +177,115 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.A_REG = 1'b0;
    defparam i_sbmac16_addsub.C_REG = 1'b0;
 
-   // Second DSP block for top half of XOR and AND operations
+   // 16x16 multiplier, for SLL - low bits
+   SB_MAC16 sb_mac16_mult1
+   (
+	   .A(mult1_A),
+	   .B(mult1_B),
+	   .C(mult_C),
+	   .D(mult_D),
+	   .O(mult1_O),
+	   .CLK(clk),
+	   .CE(DEF),
+	   .IRSTTOP(DEF),
+	   .IRSTBOT(DEF),
+	   .ORSTTOP(DEF),
+	   .ORSTBOT(DEF),
+	   .AHOLD(DEF),
+	   .BHOLD(DEF),
+	   .CHOLD(DEF),
+	   .DHOLD(DEF),
+	   .OHOLDTOP(DEF),
+	   .OHOLDBOT(DEF),
+	   .OLOADTOP(DEF),
+	   .OLOADBOT(DEF),
+	   .ADDSUBTOP(DEF),
+	   .ADDSUBBOT(DEF),
+	   .CI(DEF),
+	   .ACCUMCI(DEF),
+	   .ACCUMCO(),
+	   .SIGNEXTIN(DEF),
+	   .SIGNEXTOUT()
+   );
+
+   defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG1 = 0;
+   defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG2 = 0;
+   defparam sb_mac16_mult1.TOPOUTPUT_SELECT = 2'b11;
+   defparam sb_mac16_mult1.BOTOUTPUT_SELECT = 2'b11;
+   
+   // SLL 2
+   SB_MAC16 sb_mac16_mult2
+         (
+	 .A(mult2_A),
+	 .B(mult2_B),
+	 .C(mult_C),
+	 .D(mult_D),
+	 .O(mult2_O),
+	 .CLK(clk),
+	 .CE(DEF),
+	 .IRSTTOP(DEF),
+	 .IRSTBOT(DEF),
+	 .ORSTTOP(DEF),
+	 .ORSTBOT(DEF),
+	 .AHOLD(DEF),
+	 .BHOLD(DEF),
+	 .CHOLD(DEF),
+	 .DHOLD(DEF),
+	 .OHOLDTOP(DEF),
+	 .OHOLDBOT(DEF),
+	 .OLOADTOP(DEF),
+	 .OLOADBOT(DEF),
+	 .ADDSUBTOP(DEF),
+	 .ADDSUBBOT(DEF),
+	 .CI(DEF),
+	 .ACCUMCI(DEF),
+	 .ACCUMCO(),
+	 .SIGNEXTIN(DEF),
+	 .SIGNEXTOUT()
+ 	);
+
+ 	defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG1 = 0;
+ 	defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG2 = 0;
+	defparam sb_mac16_mult2.TOPOUTPUT_SELECT = 2'b11;
+	defparam sb_mac16_mult2.BOTOUTPUT_SELECT = 2'b11;
+
+   SB_MAC16 sb_mac16_mult3
+      (
+      .A(mult3_A),
+      .B(mult3_B),
+      .C(mult_C),
+      .D(mult_D),
+      .O(mult3_O),
+      .CLK(clk),
+      .CE(DEF),
+      .IRSTTOP(DEF),
+      .IRSTBOT(DEF),
+      .ORSTTOP(DEF),
+      .ORSTBOT(DEF),
+      .AHOLD(DEF),
+      .BHOLD(DEF),
+      .CHOLD(DEF),
+      .DHOLD(DEF),
+      .OHOLDTOP(DEF),
+      .OHOLDBOT(DEF),
+      .OLOADTOP(DEF),
+      .OLOADBOT(DEF),
+      .ADDSUBTOP(DEF),
+      .ADDSUBBOT(DEF),
+      .CI(DEF),
+      .ACCUMCI(DEF),
+      .ACCUMCO(),
+      .SIGNEXTIN(DEF),
+      .SIGNEXTOUT()
+      );
+
+   defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG1 = 0;
+   defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG2 = 0;
+   defparam sb_mac16_mult3.TOPOUTPUT_SELECT = 2'b11;
+   defparam sb_mac16_mult3.BOTOUTPUT_SELECT = 2'b11;
+
+   
+   // Second adder re-using for SLL
    SB_MAC16 xor_sb_mac16_inst
    (
 	   .A(add_A2),
@@ -203,6 +336,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam xor_sb_mac16_inst.B_REG = 1'b0;
    defparam xor_sb_mac16_inst.A_REG = 1'b0;
    defparam xor_sb_mac16_inst.C_REG = 1'b0;
+   
 
    /*
     *	This uses Yosys's support for nonzero initial values:
@@ -239,7 +373,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    end
 */
 
-   always @(clk, ALUctl, A, B, add_O) begin
+   always @(clk, ALUctl, A, B, add_O, mult2_O, add_O2) begin
 	   // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
       add_C <= B [31:16];
       add_A <= A [31:16];
@@ -247,8 +381,25 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       add_D <= A [15:0];
       add_addsubtop <= 0;
       add_addsubbot <= 0;
-      //B_lowerfive <= B[4:0];
+
+      add_C2 <= 16'b0;
+      add_A2 <= 16'b0;
+      add_B2 <= 16'b0;
+      add_D2 <= 16'b0;
+	
+      // For SLL
+      sll_two_power_n = 2 ** {B[4:0]};
+      mult1_A <= A [15:0];
+      mult1_B <= sll_two_power_n [15:0];
+      mult2_A <= A [15:0];
+      mult2_B <= sll_two_power_n [31:16];
+      //mult2_B [15:8] <= 8'b0;
+      mult3_A <= A [31:16];      //A [31:16];
+      //mult3_A [15:0] <= 8'b0;
+      mult3_B <= sll_two_power_n [15:0];
       
+      //B_lowerfive <= B[4:0];
+      /*
       add_D2 <= {1'b0, A[23], 1'b0, A[22], 1'b0, A[21], 1'b0, A[20], 1'b0, A[19], 1'b0, A[18], 1'b0, A[17], 1'b0, A[16]};
       add_A2 <= {1'b0, A[31], 1'b0, A[30], 1'b0, A[29], 1'b0, A[28], 1'b0, A[27], 1'b0, A[26], 1'b0, A[25], 1'b0, A[24]};
       add_B2 <= {1'b0, B[23], 1'b0, B[22], 1'b0, B[21], 1'b0, B[20], 1'b0, B[19], 1'b0, B[18], 1'b0, B[17], 1'b0, B[16]};
@@ -256,13 +407,81 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 
       xor_addsubtop <= 0;
       xor_addsubbot <= 0;
+      */
 
-      case (ALUctl[3:0])
+      /* Introduces a delay
+      xor_add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
+      xor_add_A <= {1'b0, A[15], 1'b0, A[14], 1'b0, A[13], 1'b0, A[12], 1'b0, A[11], 1'b0, A[10], 1'b0, A[9], 1'b0, A[8]};
+      xor_add_B <= {1'b0, B[7], 1'b0, B[6], 1'b0, B[5], 1'b0, B[4], 1'b0, B[3], 1'b0, B[2], 1'b0, B[1], 1'b0, B[0]};
+      xor_add_C <= {1'b0, B[15], 1'b0, B[14], 1'b0, B[13], 1'b0, B[12], 1'b0, B[11], 1'b0, B[10], 1'b0, B[9], 1'b0, B[8]};
+	*/
+
+      /*
+      // SLL multiplier inputs
+      mult1_A <= A[15:0];
+      mult1_B [4:0] <= B[4:0]; // testing purposes: should actually be two_power_n [15:0] where n = B[4:0]
+	*/
+      
+       /*case (ALUctl[2:0])
+	       3'b000:
+		       case (ALUctl[3])
+			       1'b0:	ALUOut = A & B;		// AND
+			       1'b1:	ALUOut = A >>> B;	// OR
+		       endcase
+	       3'b001:
+		       case (ALUctl[3])
+			       1'b0:	ALUOut = A | B;		// OR / CSRRS
+			       1'b1:	ALUOut = A << B;
+		       endcase
+	       3'b010:	begin
+		       ALUOut = add_O;
+		       case (ALUctl[3])
+			       1'b0:	begin
+				       add_addsubtop <= 0;	// ADD
+				       add_addsubbot <= 0;
+			       end
+			       1'b1:	begin
+				       add_addsubtop <= 1;	// SUB
+				       add_addsubbot <= 1;
+			       end
+		       endcase
+	       end
+	       3'b011:
+		       case (ALUctl[3])
+			       1'b0:	ALUOut = A >> B;	// SRL
+			       1'b1:	ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0; // SLT
+		       endcase
+	       3'b100:			ALUOut = A ^ B;		// XOR
+	       3'b101:			ALUOut = A;		// CSRRW
+	       3'b110:			ALUOut = (~A) & B;	// CSRRC
+	       default:			ALUOut = 0;		// not assigned to anything
+       endcase
+	*/
+
+       case (ALUctl[3:0])
 	/*
 	 *	AND (the fields also match ANDI and LUI)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	ALUOut = A & B;
-
+	
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	ALUOut = A & B;	/*begin
+			add_addsubtop <= 0;
+			add_addsubbot <= 0;
+			add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0,
+			       		A[0]};
+			add_A <= {1'b0, A[15], 1'b0, A[14], 1'b0, A[13], 1'b0, A[12], 1'b0, A[11], 1'b0, A[10], 1'b0, A[9], 
+					1'b0, A[8]};
+			add_B <= {1'b0, B[7], 1'b0, B[6], 1'b0, B[5], 1'b0, B[4], 1'b0, B[3], 1'b0, B[2], 1'b0, B[1], 1'b0,
+			       		B[0]};
+			add_C <= {1'b0, B[15], 1'b0, B[14], 1'b0, B[13], 1'b0, B[12], 1'b0, B[11], 1'b0, B[10], 1'b0, B[9], 
+					1'b0, B[8]};
+			ALUOut [15:0] <= {add_O[31], add_O[29], add_O[27], add_O[25], add_O[23], add_O[21], add_O[19], 
+					add_O[17], add_O[15], add_O[13], add_O[11], add_O[9], add_O[7], add_O[5], 
+					add_O[3], add_O[1]};
+			ALUOut [31:16] <= {add_O2[31], add_O2[29], add_O2[27], add_O2[25], add_O2[23], add_O2[21], add_O2[19], 
+					add_O2[17], add_O2[15], add_O2[13], add_O2[11], add_O2[9], add_O2[7], add_O2[5], 
+					add_O2[3], add_O2[1]};
+		end*/
+				
 	/*
 	 *	OR (the fields also match ORI)
 	 */
@@ -312,12 +531,32 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	/*
 	 *	SLL (the fields also match the other SLL variants)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLL:	ALUOut = A << B[4:0];
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLL:	begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		// discarding top 16 bit output! - check if this is correct
+		// also check if can use just 1 adder as 2 16-bit adders, save
+		// luts - not possible
+		add_C2 <= 16'b0;	//mult3_O [31:16];
+		add_A2 <= 16'b0;	//mult2_O [31:16];
+		add_B2 <= mult3_O [15:0];
+		add_D2 <= mult2_O [15:0];
+
+		add_C <= add_O2 [15:0];
+		add_A <= mult1_O [31:16];
+		add_B <= 16'b0;
+		add_D <= 16'b0;
+
+		ALUOut [31:16] <= add_O [31:16];	// Changing to 31:16 did not help
+		ALUOut [15:0] <= mult1_O [15:0];
+	end
+		
+		//ALUOut = A << B[4:0];
 
 	/*
 	 *	XOR (the fields also match other XOR variants)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	ALUOut = A ^ B;	/*begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
 		add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
@@ -331,7 +570,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 		ALUOut [31:16] <= {add_O2[30], add_O2[28], add_O2[26], add_O2[24], add_O2[22], add_O2[20], add_O2[18],
 					add_O2[16], add_O2[14], add_O2[12], add_O2[10], add_O2[8], add_O2[6], add_O2[4], 
 					add_O2[2], add_O2[0]};
-	end
+	end*/
 
 	/*
 	 *	CSRRW  only
