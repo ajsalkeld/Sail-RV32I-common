@@ -37,17 +37,18 @@
 
 
 //Data cache
+`define INST_SIZE 32'h1000
 
 module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data, led, clk_stall);
-	input			clk;
+	input				clk;
 	input [31:0]		addr;
 	input [31:0]		write_data;
-	input			memwrite;
-	input			memread;
-	input [3:0]		sign_mask;
+	input				memwrite;
+	input				memread;
+	input [3:0]			sign_mask;
 	output reg [31:0]	read_data;
 	output [7:0]		led;
-	output reg		clk_stall;	//Sets the clock high
+	output reg			clk_stall;	//Sets the clock high
 
 	/*
 	 *	led register
@@ -80,8 +81,8 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 	/*
 	 *	Buffer to identify read or write operation
 	 */
-	reg			memread_buf;
-	reg			memwrite_buf;
+	reg				memread_buf;
+	reg				memwrite_buf;
 
 	/*
 	 *	Buffers to store write data
@@ -103,7 +104,7 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 	 *
 	 *	(Bad practice: The constant for the size should be a `define).
 	 */
-	reg [31:0]		data_block[0:1023];
+	reg [31:0]		data_block[0:1023];	//Make this use EBR Memory?
 
 	/*
 	 *	wire assignments
@@ -258,7 +259,7 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 				 *	Subtract out the size of the instruction memory.
 				 *	(Bad practice: The constant should be a `define).
 				 */
-				word_buf <= data_block[addr_buf_block_addr - 32'h1000];
+				word_buf <= data_block[addr_buf_block_addr - `INST_SIZE];
 				if(memread_buf==1'b1) begin
 					state <= READ;
 				end
@@ -280,7 +281,9 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 				 *	Subtract out the size of the instruction memory.
 				 *	(Bad practice: The constant should be a `define).
 				 */
-				data_block[addr_buf_block_addr - 32'h1000] <= replacement_word;
+
+				 //Why do we do this? is the address just 
+				data_block[addr_buf_block_addr - `INST_SIZE] <= replacement_word;
 				state <= IDLE;
 			end
 
