@@ -73,18 +73,12 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg 			add_addsubtop; // 0 to add, 1 to sub
    reg 			add_addsubbot;
    
+   
    reg [15:0]		add_C2;
    reg [15:0]		add_A2;
    reg [15:0]		add_B2;
    reg [15:0]		add_D2;
    wire [31:0]		add_O2; 
-   
-   /* Removing due to delays
-   reg [15:0]		xor_add_C;
-   reg [15:0]		xor_add_A;
-   reg [15:0]		xor_add_B;
-   reg [15:0]		xor_add_D;
-   */
    
    reg			xor_addsubtop = 0; 
    reg			xor_addsubbot = 0;
@@ -102,6 +96,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    */
    
    // Defining input registers for shift multipliers
+   /*
    reg [31:0]		sll_two_power_n;
    
    reg [15:0]		mult1_A;
@@ -116,245 +111,253 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg [15:0]		mult3_B;
    wire [31:0]		mult3_O;
 
-   // For simulation
-   reg [15:0]		mult_C = 16'b0;
-   reg [15:0]		mult_D = 16'b0;
-   
-   // Use DSP for addition, subtraction
-   SB_MAC16 i_sbmac16_addsub
-     (
-      .A(add_A),
-      .B(add_B),
-      .C(add_C),
-      .D(add_D),
-      .O(add_O),
-      .CLK(clk),
-      .CE(CE),
-      .AHOLD(DEF),
-      .BHOLD(DEF),
-      .CHOLD(DEF),
-      .DHOLD(DEF),
-      .IRSTTOP(DEF),
-      .IRSTBOT(DEF),
-      .ORSTTOP(DEF),
-      .ORSTBOT(DEF),
-      .ADDSUBTOP(add_addsubtop),
-      .ADDSUBBOT(add_addsubbot),
-      .OHOLDTOP(DEF),
-      .OHOLDBOT(DEF),
-      .OLOADTOP(DEF),
-      .OLOADBOT(DEF),
-      .CI(DEF),
-      .ACCUMCI(DEF),
-      .SIGNEXTIN(DEF)
-      );
+   reg [31:0]		bit_rev_A;
+   reg [31:0]		bit_rev_srlout;
+
+// For simulation
+reg [15:0]		mult_C = 16'b0;
+reg [15:0]		mult_D = 16'b0;
+*/
+
+// Use DSP for addition, subtraction
+SB_MAC16 i_sbmac16_addsub
+(
+.A(add_A),
+.B(add_B),
+.C(add_C),
+.D(add_D),
+.O(add_O),
+.CLK(clk),
+.CE(CE),
+.AHOLD(DEF),
+.BHOLD(DEF),
+.CHOLD(DEF),
+.DHOLD(DEF),
+.IRSTTOP(DEF),
+.IRSTBOT(DEF),
+.ORSTTOP(DEF),
+.ORSTBOT(DEF),
+.ADDSUBTOP(add_addsubtop),
+.ADDSUBBOT(add_addsubbot),
+.OHOLDTOP(DEF),
+.OHOLDBOT(DEF),
+.OLOADTOP(DEF),
+.OLOADBOT(DEF),
+.CI(DEF),
+.ACCUMCI(DEF),
+.SIGNEXTIN(DEF)
+);
 
 
 
-   // add_sub_32_bypassed_unsigned [24:0] = 001_0010000_1010000_0000_0000
-   // Read configuration settings [24:0] from left to right while filling the
-   // instance parameters.
-   defparam i_sbmac16_addsub.B_SIGNED = 1'b0;
-   defparam i_sbmac16_addsub.A_SIGNED = 1'b0;
-   defparam i_sbmac16_addsub.MODE_8x8 = 1'b1;
+// add_sub_32_bypassed_unsigned [24:0] = 001_0010000_1010000_0000_0000
+// Read configuration settings [24:0] from left to right while filling the
+// instance parameters.
+defparam i_sbmac16_addsub.B_SIGNED = 1'b0;
+defparam i_sbmac16_addsub.A_SIGNED = 1'b0;
+defparam i_sbmac16_addsub.MODE_8x8 = 1'b1;
 
-   defparam i_sbmac16_addsub.BOTADDSUB_CARRYSELECT = 2'b00;
-   defparam i_sbmac16_addsub.BOTADDSUB_UPPERINPUT = 1'b1;
-   defparam i_sbmac16_addsub.BOTADDSUB_LOWERINPUT = 2'b00;
-   defparam i_sbmac16_addsub.BOTOUTPUT_SELECT = 2'b00;
+defparam i_sbmac16_addsub.BOTADDSUB_CARRYSELECT = 2'b00;
+defparam i_sbmac16_addsub.BOTADDSUB_UPPERINPUT = 1'b1;
+defparam i_sbmac16_addsub.BOTADDSUB_LOWERINPUT = 2'b00;
+defparam i_sbmac16_addsub.BOTOUTPUT_SELECT = 2'b00;
 
-   defparam i_sbmac16_addsub.TOPADDSUB_CARRYSELECT = 2'b10;
-   defparam i_sbmac16_addsub.TOPADDSUB_UPPERINPUT = 1'b1;
-   defparam i_sbmac16_addsub.TOPADDSUB_LOWERINPUT = 2'b00;
-   defparam i_sbmac16_addsub.TOPOUTPUT_SELECT = 2'b00;
+defparam i_sbmac16_addsub.TOPADDSUB_CARRYSELECT = 2'b10;
+defparam i_sbmac16_addsub.TOPADDSUB_UPPERINPUT = 1'b1;
+defparam i_sbmac16_addsub.TOPADDSUB_LOWERINPUT = 2'b00;
+defparam i_sbmac16_addsub.TOPOUTPUT_SELECT = 2'b00;
 
-   defparam i_sbmac16_addsub.PIPELINE_16x16_MULT_REG2 = 1'b0;
-   defparam i_sbmac16_addsub.PIPELINE_16x16_MULT_REG1 = 1'b0;
-   defparam i_sbmac16_addsub.BOT_8x8_MULT_REG = 1'b0;
-   defparam i_sbmac16_addsub.TOP_8x8_MULT_REG = 1'b0;
-   defparam i_sbmac16_addsub.D_REG = 1'b0;
-   defparam i_sbmac16_addsub.B_REG = 1'b0;
-   defparam i_sbmac16_addsub.A_REG = 1'b0;
-   defparam i_sbmac16_addsub.C_REG = 1'b0;
+defparam i_sbmac16_addsub.PIPELINE_16x16_MULT_REG2 = 1'b0;
+defparam i_sbmac16_addsub.PIPELINE_16x16_MULT_REG1 = 1'b0;
+defparam i_sbmac16_addsub.BOT_8x8_MULT_REG = 1'b0;
+defparam i_sbmac16_addsub.TOP_8x8_MULT_REG = 1'b0;
+defparam i_sbmac16_addsub.D_REG = 1'b0;
+defparam i_sbmac16_addsub.B_REG = 1'b0;
+defparam i_sbmac16_addsub.A_REG = 1'b0;
+defparam i_sbmac16_addsub.C_REG = 1'b0;
 
-   // 16x16 multiplier, for SLL - low bits
-   SB_MAC16 sb_mac16_mult1
-   (
-	   .A(mult1_A),
-	   .B(mult1_B),
-	   .C(mult_C),
-	   .D(mult_D),
-	   .O(mult1_O),
-	   .CLK(clk),
-	   .CE(DEF),
-	   .IRSTTOP(DEF),
-	   .IRSTBOT(DEF),
-	   .ORSTTOP(DEF),
-	   .ORSTBOT(DEF),
-	   .AHOLD(DEF),
-	   .BHOLD(DEF),
-	   .CHOLD(DEF),
-	   .DHOLD(DEF),
-	   .OHOLDTOP(DEF),
-	   .OHOLDBOT(DEF),
-	   .OLOADTOP(DEF),
-	   .OLOADBOT(DEF),
-	   .ADDSUBTOP(DEF),
-	   .ADDSUBBOT(DEF),
-	   .CI(DEF),
-	   .ACCUMCI(DEF),
-	   .ACCUMCO(),
-	   .SIGNEXTIN(DEF),
-	   .SIGNEXTOUT()
-   );
+/*
+// 16x16 multiplier, for SLL - low bits
+SB_MAC16 sb_mac16_mult1
+(
+   .A(mult1_A),
+   .B(mult1_B),
+   .C(mult_C),
+   .D(mult_D),
+   .O(mult1_O),
+   .CLK(clk),
+   .CE(DEF),
+   .IRSTTOP(DEF),
+   .IRSTBOT(DEF),
+   .ORSTTOP(DEF),
+   .ORSTBOT(DEF),
+   .AHOLD(DEF),
+   .BHOLD(DEF),
+   .CHOLD(DEF),
+   .DHOLD(DEF),
+   .OHOLDTOP(DEF),
+   .OHOLDBOT(DEF),
+   .OLOADTOP(DEF),
+   .OLOADBOT(DEF),
+   .ADDSUBTOP(DEF),
+   .ADDSUBBOT(DEF),
+   .CI(DEF),
+   .ACCUMCI(DEF),
+   .ACCUMCO(),
+   .SIGNEXTIN(DEF),
+   .SIGNEXTOUT()
+);
 
-   defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG1 = 0;
-   defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG2 = 0;
-   defparam sb_mac16_mult1.TOPOUTPUT_SELECT = 2'b11;
-   defparam sb_mac16_mult1.BOTOUTPUT_SELECT = 2'b11;
-   
-   // SLL 2
-   SB_MAC16 sb_mac16_mult2
-         (
-	 .A(mult2_A),
-	 .B(mult2_B),
-	 .C(mult_C),
-	 .D(mult_D),
-	 .O(mult2_O),
-	 .CLK(clk),
-	 .CE(DEF),
-	 .IRSTTOP(DEF),
-	 .IRSTBOT(DEF),
-	 .ORSTTOP(DEF),
-	 .ORSTBOT(DEF),
-	 .AHOLD(DEF),
-	 .BHOLD(DEF),
-	 .CHOLD(DEF),
-	 .DHOLD(DEF),
-	 .OHOLDTOP(DEF),
-	 .OHOLDBOT(DEF),
-	 .OLOADTOP(DEF),
-	 .OLOADBOT(DEF),
-	 .ADDSUBTOP(DEF),
-	 .ADDSUBBOT(DEF),
-	 .CI(DEF),
-	 .ACCUMCI(DEF),
-	 .ACCUMCO(),
-	 .SIGNEXTIN(DEF),
-	 .SIGNEXTOUT()
- 	);
+defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG1 = 0;
+defparam sb_mac16_mult1.PIPELINE_16x16_MULT_REG2 = 0;
+defparam sb_mac16_mult1.TOPOUTPUT_SELECT = 2'b11;
+defparam sb_mac16_mult1.BOTOUTPUT_SELECT = 2'b11;
 
- 	defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG1 = 0;
- 	defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG2 = 0;
-	defparam sb_mac16_mult2.TOPOUTPUT_SELECT = 2'b11;
-	defparam sb_mac16_mult2.BOTOUTPUT_SELECT = 2'b11;
+// SLL 2
+SB_MAC16 sb_mac16_mult2
+ (
+ .A(mult2_A),
+ .B(mult2_B),
+ .C(mult_C),
+ .D(mult_D),
+ .O(mult2_O),
+ .CLK(clk),
+ .CE(DEF),
+ .IRSTTOP(DEF),
+ .IRSTBOT(DEF),
+ .ORSTTOP(DEF),
+ .ORSTBOT(DEF),
+ .AHOLD(DEF),
+ .BHOLD(DEF),
+ .CHOLD(DEF),
+ .DHOLD(DEF),
+ .OHOLDTOP(DEF),
+ .OHOLDBOT(DEF),
+ .OLOADTOP(DEF),
+ .OLOADBOT(DEF),
+ .ADDSUBTOP(DEF),
+ .ADDSUBBOT(DEF),
+ .CI(DEF),
+ .ACCUMCI(DEF),
+ .ACCUMCO(),
+ .SIGNEXTIN(DEF),
+ .SIGNEXTOUT()
+);
 
-   SB_MAC16 sb_mac16_mult3
-      (
-      .A(mult3_A),
-      .B(mult3_B),
-      .C(mult_C),
-      .D(mult_D),
-      .O(mult3_O),
-      .CLK(clk),
-      .CE(DEF),
-      .IRSTTOP(DEF),
-      .IRSTBOT(DEF),
-      .ORSTTOP(DEF),
-      .ORSTBOT(DEF),
-      .AHOLD(DEF),
-      .BHOLD(DEF),
-      .CHOLD(DEF),
-      .DHOLD(DEF),
-      .OHOLDTOP(DEF),
-      .OHOLDBOT(DEF),
-      .OLOADTOP(DEF),
-      .OLOADBOT(DEF),
-      .ADDSUBTOP(DEF),
-      .ADDSUBBOT(DEF),
-      .CI(DEF),
-      .ACCUMCI(DEF),
-      .ACCUMCO(),
-      .SIGNEXTIN(DEF),
-      .SIGNEXTOUT()
-      );
+defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG1 = 0;
+defparam sb_mac16_mult2.PIPELINE_16x16_MULT_REG2 = 0;
+defparam sb_mac16_mult2.TOPOUTPUT_SELECT = 2'b11;
+defparam sb_mac16_mult2.BOTOUTPUT_SELECT = 2'b11;
 
-   defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG1 = 0;
-   defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG2 = 0;
-   defparam sb_mac16_mult3.TOPOUTPUT_SELECT = 2'b11;
-   defparam sb_mac16_mult3.BOTOUTPUT_SELECT = 2'b11;
+SB_MAC16 sb_mac16_mult3
+(
+.A(mult3_A),
+.B(mult3_B),
+.C(mult_C),
+.D(mult_D),
+.O(mult3_O),
+.CLK(clk),
+.CE(DEF),
+.IRSTTOP(DEF),
+.IRSTBOT(DEF),
+.ORSTTOP(DEF),
+.ORSTBOT(DEF),
+.AHOLD(DEF),
+.BHOLD(DEF),
+.CHOLD(DEF),
+.DHOLD(DEF),
+.OHOLDTOP(DEF),
+.OHOLDBOT(DEF),
+.OLOADTOP(DEF),
+.OLOADBOT(DEF),
+.ADDSUBTOP(DEF),
+.ADDSUBBOT(DEF),
+.CI(DEF),
+.ACCUMCI(DEF),
+.ACCUMCO(),
+.SIGNEXTIN(DEF),
+.SIGNEXTOUT()
+);
 
-   
-   // Second adder re-using for SLL
-   SB_MAC16 xor_sb_mac16_inst
-   (
-	   .A(add_A2),
-	   .B(add_B2),
-	   .C(add_C2),
-	   .D(add_D2),
-	   .O(add_O2),
-	   .CLK(clk),
-	   .CE(CE),
-	   .AHOLD(DEF),
-	   .BHOLD(DEF),
-	   .CHOLD(DEF),
-	   .DHOLD(DEF),
-	   .IRSTTOP(DEF),
-	   .IRSTBOT(DEF),
-	   .ORSTTOP(DEF),
-	   .ORSTBOT(DEF),
-	   .ADDSUBTOP(xor_addsubtop),
-	   .ADDSUBBOT(xor_addsubbot),
-	   .OHOLDTOP(DEF),
-	   .OHOLDBOT(DEF),
-	   .OLOADTOP(DEF),
-	   .OLOADBOT(DEF),
-	   .CI(DEF),
-	   .ACCUMCI(DEF),
-	   .SIGNEXTIN(DEF)
-   );
+defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG1 = 0;
+defparam sb_mac16_mult3.PIPELINE_16x16_MULT_REG2 = 0;
+defparam sb_mac16_mult3.TOPOUTPUT_SELECT = 2'b11;
+defparam sb_mac16_mult3.BOTOUTPUT_SELECT = 2'b11;
+*/
 
-   defparam xor_sb_mac16_inst.B_SIGNED = 1'b0;
-   defparam xor_sb_mac16_inst.A_SIGNED = 1'b0;
-   defparam xor_sb_mac16_inst.MODE_8x8 = 1'b1;
+// Two 16-bit adders (32-bit adder at the moment - topaddsub_carryselect
+SB_MAC16 xor_sb_mac16_inst
+(
+   .A(add_A2),
+   .B(add_B2),
+   .C(add_C2),
+   .D(add_D2),
+   .O(add_O2),
+   .CLK(clk),
+   .CE(CE),
+   .AHOLD(DEF),
+   .BHOLD(DEF),
+   .CHOLD(DEF),
+   .DHOLD(DEF),
+   .IRSTTOP(DEF),
+   .IRSTBOT(DEF),
+   .ORSTTOP(DEF),
+   .ORSTBOT(DEF),
+   .ADDSUBTOP(xor_addsubtop),
+   .ADDSUBBOT(xor_addsubbot),
+   .OHOLDTOP(DEF),
+   .OHOLDBOT(DEF),
+   .OLOADTOP(DEF),
+   .OLOADBOT(DEF),
+   .CI(DEF),
+   .ACCUMCI(DEF),
+   .SIGNEXTIN(DEF)
+);
 
-   defparam xor_sb_mac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
-   defparam xor_sb_mac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
-   defparam xor_sb_mac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
-   defparam xor_sb_mac16_inst.BOTOUTPUT_SELECT = 2'b00;
+defparam xor_sb_mac16_inst.B_SIGNED = 1'b0;
+defparam xor_sb_mac16_inst.A_SIGNED = 1'b0;
+defparam xor_sb_mac16_inst.MODE_8x8 = 1'b1;
 
-   defparam xor_sb_mac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
-   defparam xor_sb_mac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
-   defparam xor_sb_mac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
-   defparam xor_sb_mac16_inst.TOPOUTPUT_SELECT = 2'b00;
+defparam xor_sb_mac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
+defparam xor_sb_mac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
+defparam xor_sb_mac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
+defparam xor_sb_mac16_inst.BOTOUTPUT_SELECT = 2'b00;
 
-   defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
-   defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
-   defparam xor_sb_mac16_inst.BOT_8x8_MULT_REG = 1'b0;
-   defparam xor_sb_mac16_inst.TOP_8x8_MULT_REG = 1'b0;
-   defparam xor_sb_mac16_inst.D_REG = 1'b0;
-   defparam xor_sb_mac16_inst.B_REG = 1'b0;
-   defparam xor_sb_mac16_inst.A_REG = 1'b0;
-   defparam xor_sb_mac16_inst.C_REG = 1'b0;
-   
+defparam xor_sb_mac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
+defparam xor_sb_mac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
+defparam xor_sb_mac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
+defparam xor_sb_mac16_inst.TOPOUTPUT_SELECT = 2'b00;
 
-   /*
-    *	This uses Yosys's support for nonzero initial values:
-    *
-    *		https://github.com/YosysHQ/yosys/commit/0793f1b196df536975a044a4ce53025c81d00c7f
-    *
-    *	Rather than using this simulation construct (`initial`),
-    *	the design should instead use a reset signal going to
-    *	modules in the design.
-    */
-   initial begin
-      ALUOut = 32'b0;
-      Branch_Enable = 1'b0;
-   end
+defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
+defparam xor_sb_mac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
+defparam xor_sb_mac16_inst.BOT_8x8_MULT_REG = 1'b0;
+defparam xor_sb_mac16_inst.TOP_8x8_MULT_REG = 1'b0;
+defparam xor_sb_mac16_inst.D_REG = 1'b0;
+defparam xor_sb_mac16_inst.B_REG = 1'b0;
+defparam xor_sb_mac16_inst.A_REG = 1'b0;
+defparam xor_sb_mac16_inst.C_REG = 1'b0;
 
-   /*
-   always @(A, B_lowerfive) begin
-   	srl_out = A >> B_lowerfive;
+
+/*
+*	This uses Yosys's support for nonzero initial values:
+*
+*		https://github.com/YosysHQ/yosys/commit/0793f1b196df536975a044a4ce53025c81d00c7f
+*
+*	Rather than using this simulation construct (`initial`),
+*	the design should instead use a reset signal going to
+*	modules in the design.
+*/
+
+//integer i;
+//integer N; //for shift right operations
+initial begin
+ALUOut = 32'b0;
+Branch_Enable = 1'b0;
+end
+
+/*
+always @(A, B_lowerfive) begin
+srl_out = A >> B_lowerfive;
    	sra_out = A >>> B_lowerfive;
    	sll_out = A << B_lowerfive;
    end
@@ -373,7 +376,9 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    end
 */
 
-   always @(clk, ALUctl, A, B, add_O, mult2_O, add_O2) begin
+// Removed bit_rev_A, add_O2, and all the multiplier outputs to see the
+// difference
+   always @(clk, ALUctl, A, B, add_O) begin
 	   // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
       add_C <= B [31:16];
       add_A <= A [31:16];
@@ -382,13 +387,16 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       add_addsubtop <= 0;
       add_addsubbot <= 0;
 
-      add_C2 <= 16'b0;
-      add_A2 <= 16'b0;
-      add_B2 <= 16'b0;
-      add_D2 <= 16'b0;
+
+      add_C2 <= add_O2 [15:0];
+      add_A2 <= mult1_O [31:16];
+      add_B2 <= mult3_O [15:0];
+      add_D2 <= mult2_O [15:0];
 	
+
       // For SLL
-      sll_two_power_n = 2 ** {B[4:0]};
+      //sll_two_power_n = 2 ** {B[4:0]};
+      /*
       mult1_A <= A [15:0];
       mult1_B <= sll_two_power_n [15:0];
       mult2_A <= A [15:0];
@@ -397,17 +405,20 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       mult3_A <= A [31:16];      //A [31:16];
       //mult3_A [15:0] <= 8'b0;
       mult3_B <= sll_two_power_n [15:0];
-      
+	
+      // SRL
+      for (i=0; i<=31; i=i+1) bit_rev_A [i] <= A [31-i];
+	*/
       //B_lowerfive <= B[4:0];
       /*
       add_D2 <= {1'b0, A[23], 1'b0, A[22], 1'b0, A[21], 1'b0, A[20], 1'b0, A[19], 1'b0, A[18], 1'b0, A[17], 1'b0, A[16]};
       add_A2 <= {1'b0, A[31], 1'b0, A[30], 1'b0, A[29], 1'b0, A[28], 1'b0, A[27], 1'b0, A[26], 1'b0, A[25], 1'b0, A[24]};
       add_B2 <= {1'b0, B[23], 1'b0, B[22], 1'b0, B[21], 1'b0, B[20], 1'b0, B[19], 1'b0, B[18], 1'b0, B[17], 1'b0, B[16]};
       add_C2 <= {1'b0, B[31], 1'b0, B[30], 1'b0, B[29], 1'b0, B[28], 1'b0, B[27], 1'b0, B[26], 1'b0, B[25], 1'b0, B[24]};
-
+	*/
       xor_addsubtop <= 0;
       xor_addsubbot <= 0;
-      */
+      
 
       /* Introduces a delay
       xor_add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
@@ -513,43 +524,59 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 								ALUOut = add_O;
 							end
 
-	/*
-	 *	SLT (the fields also matches all the other SLT variants)
-	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;
+/*
+ *	SLT (the fields also matches all the other SLT variants)
+ */
+`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;
 
-	/*
-	 *	SRL (the fields also matches the other SRL variants)
-	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRL:	ALUOut = A >> B[4:0];
+/*
+ *	SRL (the fields also matches the other SRL variants)
+ */
+`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRL:	ALUOut = A >> B [4:0];	/*begin
+	//for (i=0; i<=31; i=i+1) bit_rev_A [i] <= A [31-i];
+		
+	mult1_A <= bit_rev_A [15:0];
+	mult2_A <= bit_rev_A [15:0];
+	mult3_A <= bit_rev_A [31:16];
 
-	/*
-	 *	SRA (the fields also matches the other SRA variants)
-	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRA:	ALUOut = A >>> B[4:0];
+	bit_rev_srlout [31:16] <= add_O2 [31:16];
+	bit_rev_srlout [15:0] <= mult1_O [15:0];
+
+	for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout [31-i];
+	end*/
+	
+/*
+ *	SRA (the fields also matches the other SRA variants)
+ */
+`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRA:	ALUOut = A >>> B [4:0];	/*begin
+	mult1_A <= bit_rev_A [15:0];
+	mult2_A <= bit_rev_A [15:0];
+	mult3_A <= bit_rev_A [31:16];
+
+	bit_rev_srlout [31:16] <= add_O2 [31:16];
+	bit_rev_srlout [15:0] <= mult1_O [15:0];
+	
+	for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout [31-i];
+
+	N = B [4:0];
+	for (i=0; i<=N-1; i=i+1) ALUOut [31-i] <= A[31];
+	//ALUOut [31:31-N] <= { N {A[31]}};
+	end*/
 
 	/*
 	 *	SLL (the fields also match the other SLL variants)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLL:	begin
-		add_addsubtop <= 0;
-		add_addsubbot <= 0;
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLL:	ALUOut = A << B [4:0];	/*begin
 		// discarding top 16 bit output! - check if this is correct
 		// also check if can use just 1 adder as 2 16-bit adders, save
 		// luts - not possible
-		add_C2 <= 16'b0;	//mult3_O [31:16];
-		add_A2 <= 16'b0;	//mult2_O [31:16];
-		add_B2 <= mult3_O [15:0];
-		add_D2 <= mult2_O [15:0];
+		mult1_A <= A [15:0];
+		mult2_A <= A [15:0];
+		mult3_A <= A [31:16];
 
-		add_C <= add_O2 [15:0];
-		add_A <= mult1_O [31:16];
-		add_B <= 16'b0;
-		add_D <= 16'b0;
-
-		ALUOut [31:16] <= add_O [31:16];	// Changing to 31:16 did not help
+		ALUOut [31:16] <= add_O2 [31:16];	// Changing to 31:16 did not help
 		ALUOut [15:0] <= mult1_O [15:0];
-	end
+	end*/
 		
 		//ALUOut = A << B[4:0];
 
