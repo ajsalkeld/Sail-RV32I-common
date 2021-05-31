@@ -41,16 +41,21 @@
  */
 
 
-
-module instruction_memory(addr, out);
+//Edit to use two blocks SB_RAM256x16?? -- Turns out the synthesiser will use the 4k EBRs anyway
+//Can't use SPRAM since it cannot be intialised
+module instruction_memory(clk, addr, out);
+	input 				clk;
 	input [31:0]		addr;
 	output [31:0]		out;
+
 
 	/*
 	 *	Size the instruction memory.
 	 *
 	 *	(Bad practice: The constant should be a `define).
 	 */
+	//If the memory is made to be synchronous, the synthesiser will synthesise using the
+	//block ram instead of distributed memory. Let's try this before messing with primitives
 	reg [31:0]		instruction_memory[0:2**12-1];
 
 	/*
@@ -67,6 +72,9 @@ module instruction_memory(addr, out);
 	 *	the design should instead use a reset signal going to
 	 *	modules in the design.
 	 */
+
+
+
 	initial begin
 		/*
 		 *	read from "program.hex" and store the instructions in instruction memory
@@ -74,5 +82,7 @@ module instruction_memory(addr, out);
 		$readmemh("verilog/program.hex",instruction_memory);
 	end
 
-	assign out = instruction_memory[addr >> 2];
+	always @(posedge clk) begin
+		out <= instruction_memory[addr >> 2];
+	end
 endmodule
