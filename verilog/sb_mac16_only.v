@@ -11,8 +11,7 @@ module SB_MAC16 (
         input CI, ACCUMCI, SIGNEXTIN,
         output [31:0] O,
         output CO, ACCUMCO, SIGNEXTOUT
-);	
-
+);
         parameter [0:0] NEG_TRIGGER = 0;
         parameter [0:0] C_REG = 0;
         parameter [0:0] A_REG = 0;
@@ -147,16 +146,15 @@ module SB_MAC16 (
         end
         assign iQ = rQ;
         assign Oh = (TOPOUTPUT_SELECT == 0) ? iP : (TOPOUTPUT_SELECT == 1) ? iQ : (TOPOUTPUT_SELECT == 2) ? iF : iH[31:16];
-	// Changing this line made no difference.
         assign HCI = (TOPADDSUB_CARRYSELECT == 0) ? 1'b0 : (TOPADDSUB_CARRYSELECT == 1) ? 1'b1 : (TOPADDSUB_CARRYSELECT == 2) ? LCO : LCO ^ ADDSUBBOT;
         assign SIGNEXTOUT = iX[15];
 
         // Lo Output Stage
         wire [15:0] YZ, Ol;
         reg [15:0] rS;
-        assign iY = BOTADDSUB_UPPERINPUT ? iD : iS; //iY = iD if sub (1), iS if add (0)
+        assign iY = BOTADDSUB_UPPERINPUT ? iD : iS;
         assign iZ = (BOTADDSUB_LOWERINPUT == 0) ? iB : (BOTADDSUB_LOWERINPUT == 1) ? iG : (BOTADDSUB_LOWERINPUT == 2) ? iH[15:0] : {16{SIGNEXTIN}};
-        assign {LCO, YZ} = iZ + (iY ^ {16{ADDSUBBOT}}) + LCI; // iY or'd with addsubbot extended to 16 bits - iY is inverted for a subtract operation - this line performs the addition/subtraction? LCI defined below - combinational not sequential - input carry
+        assign {LCO, YZ} = iZ + (iY ^ {16{ADDSUBBOT}}) + LCI;
         assign iR = OLOADBOT ? iD : YZ ^ {16{ADDSUBBOT}};
         always @(posedge clock, posedge ORSTBOT) begin
                 if (ORSTBOT) begin

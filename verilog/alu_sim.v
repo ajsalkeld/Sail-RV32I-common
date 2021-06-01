@@ -1,4 +1,5 @@
 `include "alu_control.v"
+//`include "alu.v"
 `timescale 1s/100ms
 
 module top();
@@ -132,6 +133,14 @@ initial begin
 	A = 32'b1;
 	B = 32'b11111;
 	FuncCode = 4'b0001;
+	Opcode = 7'b0110011;
+
+	#5
+
+	// SLT
+	A = 32'b10;
+	B = 32'b0;
+	FuncCode = 4'b0010;
 	Opcode = 7'b0110011;
 
  	#50
