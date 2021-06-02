@@ -48,7 +48,7 @@ module instruction_memory(clk, addr, out);
 	input [31:0]		addr;
 	output [31:0]		out;
 
-	wire [31:0] read;
+	wire [31:0] read = 32h'00000000;
 	/*
 	 *	Size the instruction memory.
 	 *
