@@ -48,7 +48,7 @@ module instruction_memory(clk, addr, out);
 	input [31:0]		addr;
 	output [31:0]		out;
 
-
+	wire [31:0] read;
 	/*
 	 *	Size the instruction memory.
 	 *
@@ -83,6 +83,9 @@ module instruction_memory(clk, addr, out);
 	end
 
 	always @(posedge clk) begin
-		out <= instruction_memory[addr >> 2];
+		read <= instruction_memory[addr >> 2];
 	end
+
+	assign out = read;
+
 endmodule
