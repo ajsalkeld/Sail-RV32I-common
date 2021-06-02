@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-`include "sb_mac16_only.v" //simulation testing purposes
+//`include "sb_mac16_only.v" //simulation testing purposes
 
 /*
  *	Description:
@@ -72,7 +72,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg 			add_addsubbot;
    //reg			sub_addsubbot = 1;
    //reg			sub_addsubbot = 1; 
-  
+
    reg [15:0]		add_C2;
    reg [15:0]		add_A2;
    reg [15:0]		add_B2;
@@ -89,7 +89,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg			CE = 1;
    reg			DEF = 0;
 
-   
+
    reg [15:0]		mult1_A;
    reg [15:0]		mult1_B;
    reg [15:0]		mult_C = 16'b0;
@@ -393,7 +393,7 @@ srl_out = A >> B_lowerfive;
 */
 
 // Removed bit_rev_A, add_O2, and all the multiplier outputs to see the
-// difference
+// difference - none
    always @(clk, ALUctl, A, B, add_O, mult1_O, mult2_O, mult3_O) begin
 	   // i_sbmac16_addsub: add_C+add_A -> top, add_B+add_D -> bottom
       add_addsubtop <= 0;
@@ -432,10 +432,10 @@ srl_out = A >> B_lowerfive;
       add_B2 <= {1'b0, B[23], 1'b0, B[22], 1'b0, B[21], 1'b0, B[20], 1'b0, B[19], 1'b0, B[18], 1'b0, B[17], 1'b0, B[16]};
       add_C2 <= {1'b0, B[31], 1'b0, B[30], 1'b0, B[29], 1'b0, B[28], 1'b0, B[27], 1'b0, B[26], 1'b0, B[25], 1'b0, B[24]};
 	*/
-      
+    
       xor_addsubtop <= 0;
       xor_addsubbot <= 0;
-     
+ 
 
       /* Introduces a delay
       xor_add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
@@ -492,9 +492,19 @@ srl_out = A >> B_lowerfive;
 	 */
 	
 	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	ALUOut = A & B;	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		add_A <= A [31:16] & B [31:16];
+		add_D <= A [15:0] & B [15:0];
+		ALUOut = add_O;	//A & B;
+	end*/
+	/*begin
 			add_addsubtop <= 0;
 			add_addsubbot <= 0;
 			add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0,
+				B
 			       		A[0]};
 			add_A <= {1'b0, A[15], 1'b0, A[14], 1'b0, A[13], 1'b0, A[12], 1'b0, A[11], 1'b0, A[10], 1'b0, A[9], 
 					1'b0, A[8]};
@@ -547,13 +557,25 @@ srl_out = A >> B_lowerfive;
 	/*
  	*	SLT (the fields also matches all the other SLT variants)
  	*/
-       `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;
+       `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	/*ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;*/
        //gives correct answer but increases luts when ? part missing.
-       /*begin
+       begin
 		add_addsubtop <= 1;
- 		add_addsubtop <= 1;
-		ALUOut = add_O[31] ? 32'b1 : 32'b0; 
-	end*/		
+ 		add_addsubbot <= 1;
+		add_C <= B [31:16];
+		add_B <= B [15:0];
+		add_A <= A [31:16];
+		add_D <= A [15:0];
+		ALUOut = add_O[31] & 1'b1;
+		//ALUOut = add_O[31] ? 32'b1 : 32'b0;
+		/*xor_addsubbot <= 0;
+		xor_addsubtop <= 0;
+		add_C <= 16'b0;
+		add_A <= 16'b0;
+		add_B <= 16'b0;
+		add_D <= add_O[31];
+		ALUOut <= add_O2;*/
+	end		
 
 		//ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;
 
@@ -570,8 +592,17 @@ srl_out = A >> B_lowerfive;
 		bit_rev_srlout [31:16] <= add_O2 [31:16];
 		bit_rev_srlout [15:0] <= mult1_O [15:0];
 
-		for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout [31-i];
-		end*/
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		for (i=0; i<=15; i=i+1) 
+			begin
+				add_D [i] <= bit_rev_srlout [31-i];
+				add_A [i] <= bit_rev_srlout [15-i];
+			end
+		for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout
+		* [31-i];
+		ALUOut <= add_O;
+	end*/
 	
 	/*
 	 *	SRA (the fields also matches the other SRA variants)
@@ -653,7 +684,16 @@ srl_out = A >> B_lowerfive;
 	/*
 	 *	CSRRC only
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRC:	/*begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRC:	/*ALUOut = (~A) & B;*/	/*begin
+		add_addsubtop <= 1;
+		add_addsubbot <= 1;
+		add_C <= A [31:16];
+		add_B <= A [15:0];
+		add_A <= A [31:16] & B [31:16];
+		add_D <= A [15:0] & B [15:0];
+		ALUOut <= add_O;
+	end*/
+	/*	begin
 		ALUOut <= B;
 		for (i=0; i<=31; i=i+1) begin
 			if (A[i]) ALUOut[i] <= 1'b0;
