@@ -46,7 +46,7 @@
 module instruction_memory(clk, addr, out);
 	input 				clk;
 	input [31:0]		addr;
-	reg output [31:0]		out;
+	output reg [31:0]	out;
 	/*
 	 *	Size the instruction memory.
 	 *
