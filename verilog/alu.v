@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-//`include "sb_mac16_only.v" //simulation testing purposes
+`include "sb_mac16_only.v" //simulation testing purposes
 
 /*
  *	Description:
@@ -89,6 +89,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg			CE = 1;
    reg			DEF = 0;
 
+   
    reg [15:0]		mult1_A;
    reg [15:0]		mult1_B;
    reg [15:0]		mult_C = 16'b0;
@@ -363,7 +364,7 @@ defparam xor_sb_mac16_inst.C_REG = 1'b0;
 *	modules in the design.
 */
 
-//integer i;
+integer i;
 //integer N; //for shift right operations
 initial begin
 ALUOut = 32'b0;
@@ -403,6 +404,7 @@ srl_out = A >> B_lowerfive;
       add_B <= B [15:0];
       add_D <= A [15:0];
 
+
       add_C2 <= add_O2 [15:0];
       add_A2 <= mult1_O [31:16];
       add_B2 <= mult3_O [15:0];
@@ -433,7 +435,7 @@ srl_out = A >> B_lowerfive;
       
       xor_addsubtop <= 0;
       xor_addsubbot <= 0;
-      
+     
 
       /* Introduces a delay
       xor_add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
@@ -511,7 +513,10 @@ srl_out = A >> B_lowerfive;
 	/*
 	 *	OR (the fields also match ORI)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	ALUOut = A | B;
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	begin
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? 1'b1 : B[i]; //Adds 2 LUTs! - change back or improve
+	end
+		//ALUOut = A | B;
 
 	/*
 	 *	ADD (the fields also match AUIPC, all loads (inc. LW), all stores, and ADDI)
@@ -543,6 +548,7 @@ srl_out = A >> B_lowerfive;
  	*	SLT (the fields also matches all the other SLT variants)
  	*/
        `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;
+       //gives correct answer but increases luts when ? part missing.
        /*begin
 		add_addsubtop <= 1;
  		add_addsubtop <= 1;
@@ -596,8 +602,11 @@ srl_out = A >> B_lowerfive;
 		mult2_A <= A [15:0];
 		mult3_A <= A [31:16];
 
-		ALUOut [31:16] <= add_O2 [31:16];	// Changing to 31:16 did not help
-		ALUOut [15:0] <= mult1_O [15:0];
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		add_A <= add_O2 [31:16];	// Changing to 31:16 did not help
+		add_D <= mult1_O [15:0];
+		ALUOut <= add_O;
 	end
 		
 		//ALUOut = A << B[4:0];
@@ -637,20 +646,26 @@ srl_out = A >> B_lowerfive;
 		//ALUOut = A;
 
 	/*
-	 *	CSRRS only
+	 *	CSRRS only - keep this commented out - reduces luts by ~29
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRS:	ALUOut = A | B;
+	//`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRS:	ALUOut = A | B;
 
 	/*
 	 *	CSRRC only
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRC:	begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRC:	/*begin
+		ALUOut <= B;
+		for (i=0; i<=31; i=i+1) begin
+			if (A[i]) ALUOut[i] <= 1'b0;
+		end
+	end*/
+		begin
 		add_addsubtop <= 1;
 		add_addsubbot <= 1;
 		add_C <= A [31:16];
 		add_B <= A [15:0];
-		add_A <= 16'b1;
-		add_B <= 16'b1;
+		add_A <= 16'b1111111111111111;
+		add_B <= 16'b1111111111111111;
 		ALUOut = add_O & B;
 	end
 		//ALUOut = (~A) & B;

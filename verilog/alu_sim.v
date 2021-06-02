@@ -143,6 +143,21 @@ initial begin
 	FuncCode = 4'b0010;
 	Opcode = 7'b0110011;
 
+	#5
+
+	//simulate CSRRS instruction (copy of OR with 1 in opcode msb)
+        A = 32'b00001111;
+        B = 32'b01010101;
+	FuncCode = 4'b0110;
+	Opcode = 7'b1110011;
+
+	#5
+	//simulate SRA instruction - testing negative 2's comp numbers
+        A = 32'b11111111111111111111111111111111;
+	B = 32'b10;
+	FuncCode = 4'b1101;
+	Opcode = 7'b0110011;
+
  	#50
 
  	$finish;
