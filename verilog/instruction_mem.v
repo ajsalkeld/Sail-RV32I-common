@@ -56,7 +56,7 @@ module instruction_memory(clk, addr, out);
 	 */
 	//If the memory is made to be synchronous, the synthesiser will synthesise using the
 	//block ram instead of distributed memory. Let's try this before messing with primitives
-	reg [31:0]		instruction_memory[0:2**12-1];
+	reg [31:0]		instruction_memory[0:2**10-1];
 
 	/*
 	 *	According to the "iCE40 SPRAM Usage Guide" (TN1314 Version 1.0), page 5:
