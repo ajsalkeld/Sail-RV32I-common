@@ -70,11 +70,11 @@ module branch_predictor(
    /*
     *  Internal states
     */
-   reg [5:0] 		bh_reg; // Global branch history register
-   reg [11:0] 		choose_pht_reg; // last 2bc, current 2bc
+   reg [7:0] 		bh_reg; // Global branch history register
+   reg [15:0] 		choose_pht_reg; // last 2bc, current 2bc
    
-   reg [63:0] 	s1;
-   reg [63:0] 	s0;
+   reg [255:0] 	s1;
+   reg [255:0] 	s0;
 
    reg 			branch_mem_sig_reg;
 
@@ -89,11 +89,11 @@ module branch_predictor(
     *	modules in the design and to thereby set the values.
     */
    initial begin
-      s1 = 64'd0;
-      s0 = 64'd0;
+      s1 = 255'd0;
+      s0 = 255'd0;
       branch_mem_sig_reg = 1'b0;
-      choose_pht_reg = 12'd0;
-      bh_reg = 6'd0;
+      choose_pht_reg = 16'd0;
+      bh_reg = 8'd0;
    end
 
    always @(negedge clk) begin
@@ -107,13 +107,13 @@ module branch_predictor(
     */
    always @(posedge clk) begin
       if (branch_mem_sig_reg) begin
-	 choose_pht_reg = {choose_pht_reg[5:0], (in_addr[5:0] ^ bh_reg)};
-	 bh_reg <= {bh_reg[4:0],actual_branch_decision};
-	 s1[choose_pht_reg[11:6]] <= (s1[choose_pht_reg[11:6]]&s0[choose_pht_reg[11:6]]) | (s0[choose_pht_reg[11:6]]&actual_branch_decision) | (s1[choose_pht_reg[11:6]]&actual_branch_decision);
-	 s0[choose_pht_reg[11:6]] <= (s1[choose_pht_reg[11:6]]&(!s0[choose_pht_reg[11:6]])) | ((!s0[choose_pht_reg[11:6]])&actual_branch_decision) | (s1[choose_pht_reg[11:6]]&actual_branch_decision);
+	 choose_pht_reg = {choose_pht_reg[7:0], (in_addr[7:0] ^ bh_reg)};
+	 bh_reg <= {bh_reg[6:0],actual_branch_decision};
+	 s1[choose_pht_reg[15:8]] <= (s1[choose_pht_reg[15:8]]&s0[choose_pht_reg[15:8]]) | (s0[choose_pht_reg[15:8]]&actual_branch_decision) | (s1[choose_pht_reg[15:8]]&actual_branch_decision);
+	 s0[choose_pht_reg[15:8]] <= (s1[choose_pht_reg[15:8]]&(!s0[choose_pht_reg[15:8]])) | ((!s0[choose_pht_reg[15:8]])&actual_branch_decision) | (s1[choose_pht_reg[15:8]]&actual_branch_decision);
       end
    end
 
    assign branch_addr = in_addr + offset;
-   assign prediction = s1[choose_pht_reg[5:0]] & branch_decode_sig;
+   assign prediction = s1[choose_pht_reg[7:0]] & branch_decode_sig;
 endmodule
