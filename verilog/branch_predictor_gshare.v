@@ -73,8 +73,8 @@ module branch_predictor(
    reg [3:0] 		bh_reg; // Global branch history register
    reg [15:0] 		choose_pht_reg; // last 2bc, current 2bc
    
-   reg [255-1:0] 	s1;
-   reg [255-1:0] 	s0;
+   reg [255:0] 	s1;
+   reg [255:0] 	s0;
 
    reg 			branch_mem_sig_reg;
 
