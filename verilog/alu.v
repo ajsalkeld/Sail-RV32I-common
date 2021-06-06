@@ -106,6 +106,18 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    //reg [31:0]		bit_rev_A;
    //reg [31:0]		bit_rev_srlout;
    
+   // for branch enable cases
+   wire			add_signextout;
+   reg			branch_addsubtop;
+   reg			branch_addsubbot;
+   reg [15:0]		branch_A;
+   reg [15:0]		branch_B;
+   reg [15:0]		branch_C;
+   reg [15:0]		branch_D;   
+   wire [31:0]		br_O;
+
+  // reg			br_sel; // 1 if ALUOut is 0.
+
    /*
    // Discarding higher bits of B for SRL, SRA, and SLL operations.
    reg	[4:0]		B_lowerfive;
@@ -126,7 +138,8 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
       .ADDSUBTOP(add_addsubtop),
       .ADDSUBBOT(add_addsubbot),
       .OLOADTOP(DEF),
-      .OLOADBOT(DEF)
+      .OLOADBOT(DEF)/*,
+      .SIGNEXTOUT(add_signextout)*/
       );
 
    // add_sub_32_bypassed_unsigned [24:0] = 001_0010000_1010000_0000_0000
@@ -155,42 +168,60 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.A_REG = 1'b0;
    defparam i_sbmac16_addsub.C_REG = 1'b0;
 
-   // DSP for subtract
-   /*
-   SB_MAC16 sub_sbmac16_inst
+   // DSP for branch enable block
+  
+   SB_MAC16 branch_sbmac16_inst
    (
-	   .A(add_A),
-	   .B(add_B),
-	   .C(add_C),
-	   .D(add_D),
-	   .O(sub_O),
+	   .A(branch_A),
+	   .B(branch_B),
+	   .C(branch_C),
+	   .D(branch_D),
+	   .O(br_O),
 	   .CLK(clk),
-	   .ADDSUBTOP(sub_addsubtop),
-	   .ADDSUBBOT(sub_addsubbot)
+	   .ADDSUBTOP(branch_addsubtop),
+	   .ADDSUBBOT(branch_addsubbot),
+	   .SIGNEXTOUT(add_signextout),
+	   .CE(DEF),
+	   .IRSTTOP(DEF),
+	   .IRSTBOT(DEF),
+	   .ORSTTOP(DEF),
+	   .ORSTBOT(DEF),
+	   .AHOLD(DEF),
+	   .BHOLD(DEF),
+	   .CHOLD(DEF),
+	   .DHOLD(DEF),
+	   .OHOLDTOP(DEF),
+	   .OHOLDBOT(DEF),
+	   .OLOADTOP(DEF),
+	   .OLOADBOT(DEF),
+	   .CI(DEF),
+	   .ACCUMCI(DEF),
+	   .ACCUMCO(),
+	   .SIGNEXTIN(DEF)
    );
 
-   defparam sub_sbmac16_inst.B_SIGNED = 1'b0;
-   defparam sub_sbmac16_inst.A_SIGNED = 1'b0;
-   defparam sub_sbmac16_inst.MODE_8x8 = 1'b1;
-   defparam sub_sbmac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
-   defparam sub_sbmac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
-   defparam sub_sbmac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
-   defparam sub_sbmac16_inst.BOTOUTPUT_SELECT = 2'b00;
+   defparam branch_sbmac16_inst.B_SIGNED = 1'b0;
+   defparam branch_sbmac16_inst.A_SIGNED = 1'b0;
+   defparam branch_sbmac16_inst.MODE_8x8 = 1'b1;
+   defparam branch_sbmac16_inst.BOTADDSUB_CARRYSELECT = 2'b00;
+   defparam branch_sbmac16_inst.BOTADDSUB_UPPERINPUT = 1'b1;
+   defparam branch_sbmac16_inst.BOTADDSUB_LOWERINPUT = 2'b00;
+   defparam branch_sbmac16_inst.BOTOUTPUT_SELECT = 2'b00;
 
-   defparam sub_sbmac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
-   defparam sub_sbmac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
-   defparam sub_sbmac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
-   defparam sub_sbmac16_inst.TOPOUTPUT_SELECT = 2'b00;
+   defparam branch_sbmac16_inst.TOPADDSUB_CARRYSELECT = 2'b10;
+   defparam branch_sbmac16_inst.TOPADDSUB_UPPERINPUT = 1'b1;
+   defparam branch_sbmac16_inst.TOPADDSUB_LOWERINPUT = 2'b00;
+   defparam branch_sbmac16_inst.TOPOUTPUT_SELECT = 2'b00;
 
-   defparam sub_sbmac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
-   defparam sub_sbmac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
-   defparam sub_sbmac16_inst.BOT_8x8_MULT_REG = 1'b0;
-   defparam sub_sbmac16_inst.TOP_8x8_MULT_REG = 1'b0;
-   defparam sub_sbmac16_inst.D_REG = 1'b0;
-   defparam sub_sbmac16_inst.B_REG = 1'b0;
-   defparam sub_sbmac16_inst.A_REG = 1'b0;
-   defparam sub_sbmac16_inst.C_REG = 1'b0;  
-*/
+   defparam branch_sbmac16_inst.PIPELINE_16x16_MULT_REG2 = 1'b0;
+   defparam branch_sbmac16_inst.PIPELINE_16x16_MULT_REG1 = 1'b0;
+   defparam branch_sbmac16_inst.BOT_8x8_MULT_REG = 1'b0;
+   defparam branch_sbmac16_inst.TOP_8x8_MULT_REG = 1'b0;
+   defparam branch_sbmac16_inst.D_REG = 1'b0;
+   defparam branch_sbmac16_inst.B_REG = 1'b0;
+   defparam branch_sbmac16_inst.A_REG = 1'b0;
+   defparam branch_sbmac16_inst.C_REG = 1'b0;  
+
 
 // 16x16 multiplier, for SLL - low bits
 SB_MAC16 sb_mac16_mult1
@@ -491,7 +522,22 @@ srl_out = A >> B_lowerfive;
 	 *	AND (the fields also match ANDI and LUI)
 	 */
 	
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	ALUOut = A & B;	/*begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	
+	begin
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? B[i] : 1'b0;
+	end
+
+	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		add_A <= A [31:16];	// & B [31:16];
+		add_D <= A [15:0];	// & B [15:0];
+		ALUOut <= add_O & B;
+	end*/
+		
+	/*begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
 		add_C <= 16'b0;
@@ -523,9 +569,17 @@ srl_out = A >> B_lowerfive;
 	/*
 	 *	OR (the fields also match ORI)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	begin
-		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? 1'b1 : B[i]; //Adds 2 LUTs! - change back or improve
-	end
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? 1'b1 : B[i];
+	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 32'b0;
+		add_B <= 32'b0;
+		add_A <= A [31:16];
+		add_D <= A [15:0];
+		for (i=0; i<=31; i=i+1) ALUOut[i] = add_O ? 1'b1 : B[i];
+	end*/
 		//ALUOut = A | B;
 
 	/*
@@ -558,7 +612,6 @@ srl_out = A >> B_lowerfive;
  	*	SLT (the fields also matches all the other SLT variants)
  	*/
        `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SLT:	/*ALUOut = $signed(A) < $signed(B) ? 32'b1 : 32'b0;*/
-       //gives correct answer but increases luts when ? part missing.
        begin
 		add_addsubtop <= 1;
  		add_addsubbot <= 1;
@@ -582,7 +635,20 @@ srl_out = A >> B_lowerfive;
 	/*
  	*	SRL (the fields also matches the other SRL variants)
  	*/
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRL:	ALUOut = A >> B [4:0];	/*begin
+       `kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRL:	ALUOut = A >> B [4:0];
+	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		add_A <= A [31:16+B[4:0]];
+		add_D <= A [16+B[4:0]:B[4:0]];
+		ALUOut <= add_O;
+	end*/
+
+		//ALUOut = A >> B [4:0];	
+	
+	/*begin
 		for (i=0; i<=31; i=i+1) bit_rev_A [i] <= A [31-i];
 		
 		mult1_A <= bit_rev_A [15:0];
@@ -599,15 +665,15 @@ srl_out = A >> B_lowerfive;
 				add_D [i] <= bit_rev_srlout [31-i];
 				add_A [i] <= bit_rev_srlout [15-i];
 			end
-		for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout
-		* [31-i];
+		//for (i=0; i<=31; i=i+1) ALUOut [i] <= bit_rev_srlout [31-i];
 		ALUOut <= add_O;
 	end*/
 	
 	/*
 	 *	SRA (the fields also matches the other SRA variants)
  	*/
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRA:	ALUOut = A >>> B [4:0];	/*begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_SRA:	ALUOut = $signed(A) >>> B [4:0];
+	/*begin
 	mult1_A <= bit_rev_A [15:0];
 	mult2_A <= bit_rev_A [15:0];
 	mult3_A <= bit_rev_A [31:16];
@@ -646,7 +712,38 @@ srl_out = A >> B_lowerfive;
 	 *	XOR (the fields also match other XOR variants)
 	 */
 
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	ALUOut = A ^ B;	/*begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	//ALUOut = {A[31:0] ? (~B[31:0]) : B[31:0]};
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? (~B[i]) : B[i];
+	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 32'b0;
+		add_B <= 32'b0;
+		add_A <= A [31:16];
+		add_D <= A [15:0];
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? add_O : B[i];	
+	end*/
+		/*begin
+		add_addsubtop <= 1;
+		add_addsubbot <= 1;
+		// Output = A-C, D-B
+		add_C <= A [31:16];
+		add_B <= A [15:0];
+		add_A <= 16'b1111111111111111;
+		add_D <= 16'b1111111111111111;
+		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? add_O[i] : B[i];
+	end*/
+	/*ALUOut = A ^ B;*/	
+	/*begin
+		add_addsubtop <= 0;
+		add_addsubbot <= 0;
+		add_C <= 16'b0;
+		add_B <= 16'b0;
+		add_A <= A [31:16] ^ B [31:16];
+		add_D <= A [15:0] ^ B [15:0];
+		ALUOut <= add_O;
+	end*/
+	/*begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
 		add_D <= {1'b0, A[7], 1'b0, A[6], 1'b0, A[5], 1'b0, A[4], 1'b0, A[3], 1'b0, A[2], 1'b0, A[1], 1'b0, A[0]};
@@ -665,7 +762,7 @@ srl_out = A >> B_lowerfive;
         /*
 	 *	CSRRW  only
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRW:	begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_CSRRW:	/*ALUOut = A;*/	begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
 		add_C <= 16'b0;
@@ -705,7 +802,7 @@ srl_out = A >> B_lowerfive;
 		add_C <= A [31:16];
 		add_B <= A [15:0];
 		add_A <= 16'b1111111111111111;
-		add_B <= 16'b1111111111111111;
+		add_D <= 16'b1111111111111111;
 		ALUOut = add_O & B;
 	end
 		//ALUOut = (~A) & B;
@@ -717,15 +814,35 @@ srl_out = A >> B_lowerfive;
       endcase
    end
 
-   always @(ALUctl, ALUOut, A, B) begin
-      case (ALUctl[6:4])
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BEQ:	Branch_Enable = (ALUOut == 0);
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BNE:	Branch_Enable = !(ALUOut == 0);
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLT:	Branch_Enable = ($signed(A) < $signed(B));
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGE:	Branch_Enable = ($signed(A) >= $signed(B));
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLTU:	Branch_Enable = ($unsigned(A) < $unsigned(B));
-	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGEU:	Branch_Enable = ($unsigned(A) >= $unsigned(B));
+   /*always @(ALUOut) begin
+	   br_sel = (ALUOut == 0);
+   end*/
 
+   always @(ALUctl, ALUOut, A, B/*, br_O*/) begin
+	   branch_addsubtop <= 1;
+           branch_addsubbot <= 1;
+	   branch_C <= B [31:16];
+	   branch_B <= B [15:0];
+	   branch_A <= A [31:16];
+	   branch_D <= A [15:0];
+
+	   case (ALUctl[6:4])
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BEQ:	Branch_Enable =	(ALUOut == 0);
+	/*begin
+		if (A[31] == B[31])	Branch_Enable = br_O[31] ^ 1'b1;
+		else			Branch_Enable = A[31];
+	end*/
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BNE:	Branch_Enable = !(ALUOut == 0);
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLT:	//Branch_Enable = add_signextout;
+		Branch_Enable <= br_O[31] & 1'b1;
+		//Branch_Enable = ($signed(A) < $signed(B));
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGE:	//Branch_Enable = add_signextout ? 1'b0 : 1'b1;
+		Branch_Enable <= br_O[31] ^ 1'b1;
+		//Branch_Enable = ($signed(A) >= $signed(B));
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLTU:	//Branch_Enable <= add_signextout;
+		Branch_Enable = ($unsigned(A) < $unsigned(B));
+	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGEU:	//Branch_Enable <= add_signextout ? 1'b0 : 1'b1;
+		Branch_Enable = ($unsigned(A) >= $unsigned(B));
 	default:					Branch_Enable = 1'b0;
       endcase
    end
