@@ -153,17 +153,10 @@ initial begin
 
 	#5
 	//simulate SRA instruction - testing negative 2's comp numbers
-        A = 32'hFFFFFFFF;
+        A = 32'b11111111111111111111111111111111;
 	B = 32'b10;
 	FuncCode = 4'b1101;
 	Opcode = 7'b0110011;
-
-	#5
-	//simulate BLT branch instructions
-	A = 32'b1;
-	B = 32'b10;
-	FuncCode = 4'b0100;
-	Opcode = 7'b1100011;
 
  	#50
 

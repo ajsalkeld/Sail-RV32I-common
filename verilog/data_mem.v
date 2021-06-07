@@ -103,7 +103,7 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 	 *
 	 *	(Bad practice: The constant for the size should be a `define).
 	 */
-	reg [31:0]		data_block[0:1023];	//1023
+	reg [31:0]		data_block[0:1023];
 
 	/*
 	 *	wire assignments
@@ -246,9 +246,8 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 				write_data_buffer <= write_data;
 				addr_buf <= addr;
 				sign_mask_buf <= sign_mask;
-
+				
 				if(memwrite==1'b1 || memread==1'b1) begin
-				//if(memwrite ? 1'b1 : memread) begin
 					state <= READ_BUFFER;
 					clk_stall <= 1;
 				end
@@ -259,7 +258,7 @@ module data_mem (clk, addr, write_data, memwrite, memread, sign_mask, read_data,
 				 *	Subtract out the size of the instruction memory.
 				 *	(Bad practice: The constant should be a `define).
 				 */
-				word_buf <= data_block[addr_buf_block_addr - 32'h1000];	//32'h1000 for 2^12 size, 32'h0400 for 2^10
+				word_buf <= data_block[addr_buf_block_addr - 32'h1000];
 				if(memread_buf==1'b1) begin
 					state <= READ;
 				end
