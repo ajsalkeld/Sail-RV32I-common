@@ -1,5 +1,5 @@
 #!/bin/bash
 
-iverilog ../verilog/alu.v ../verilog/alu_control.v alu_sim.v
+iverilog ./SB_MAC16.v ../verilog/alu.v ../verilog/alu_control.v ./alu_sim.v -v
 vvp a.out
-gtkwave adder.vcd
+gtkwave alu.vcd

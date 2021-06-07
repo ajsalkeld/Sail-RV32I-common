@@ -1,3 +1,4 @@
+`timescale 1s/100ms
 module top();
 	reg clk = 0;
 
@@ -31,7 +32,7 @@ always
  #0.5 clk = ~clk;
 
 initial begin
-	$dumpfile ("adder.vcd");
+	$dumpfile ("alu.vcd");
  	$dumpvars;
 
  	//reg[31:0] A, B;
@@ -46,7 +47,7 @@ initial begin
  	#5
 
  	//simulate AND instruction
- 	A = 32'b00001111;
+ 	A = 32'b01001111;
  	B = 32'b01010101;
  	FuncCode = 4'b0111;
  	Opcode = 7'b0110011;
@@ -59,13 +60,7 @@ initial begin
  	FuncCode = 4'b0110;
  	Opcode = 7'b0110011;
 
- 	#5
-
- 	//simulate ADD instruction
- 	A = 32'd10000;
- 	B = 32'd0111;
- 	FuncCode = 4'b0000;
- 	Opcode = 7'b0110011;
+ 	
 
  	#5
 
@@ -74,7 +69,14 @@ initial begin
  	B = 32'd0111;
  	FuncCode = 4'b1000;
  	Opcode = 7'b0110011;
+        
+        #5
 
+ 	//simulate ADD instruction
+ 	A = 32'd10000;
+ 	B = 32'd0111;
+ 	FuncCode = 4'b0000;
+ 	Opcode = 7'b0110011;
  	#5
 
  	//simulate SLT instuction
@@ -115,7 +117,7 @@ initial begin
  	FuncCode = 4'b0100;
  	Opcode = 7'b0110011;
 
- 	#5
+ 	#50
 
  	$finish;
 end
