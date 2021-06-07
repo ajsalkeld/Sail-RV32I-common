@@ -165,6 +165,48 @@ initial begin
 	FuncCode = 4'b0100;
 	Opcode = 7'b1100011;
 
+	#5
+	//simulate BLT branch instruction - output 0
+	A = 32'b10;
+	B = 32'b1;
+	FuncCode = 4'b0100;
+	Opcode = 7'b1100011;
+
+	#5
+	//simulate BLT where A=B
+	A = 32'b1;
+	B = 32'b1;
+	FuncCode = 4'b0100;
+	Opcode = 7'b1100011;
+
+	#5
+	//simulate BGE, A<B
+	A = 32'b1;
+	B = 32'b10;
+	FuncCode = 4'b0101;
+	Opcode = 7'b1100011;
+
+	#5
+	//simulate BGE, A>B;
+	A = 32'b10;
+	B = 32'b1;
+	FuncCode = 4'b0101;
+	Opcode = 7'b1100011;
+
+	#5
+	//simulate BGE, A=B
+	A = 32'b1;
+	B = 32'b1;
+	FuncCode = 4'b0101;
+	Opcode = 7'b1100011;
+
+	#5
+	//BLT test with negative A
+	A = 32'hFFFFFFFF;
+	B = 32'b1;
+	FuncCode = 4'b0100;
+	Opcode = 7'b1100011;
+
  	#50
 
  	$finish;

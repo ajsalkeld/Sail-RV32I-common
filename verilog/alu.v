@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-//`include "sb_mac16_only.v" //simulation testing purposes
+`include "sb_mac16_only.v" //simulation testing purposes
 
 /*
  *	Description:
@@ -61,7 +61,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    input [31:0] 	B;
    output reg [31:0] 	ALUOut;
    output reg		Branch_Enable;
-
+  
    reg [15:0] 		add_C;
    reg [15:0] 		add_A;
    reg [15:0] 		add_B;
@@ -105,7 +105,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg [31:0]		sll_two_power_n;
    //reg [31:0]		bit_rev_A;
    //reg [31:0]		bit_rev_srlout;
-   
+   /*
    // for branch enable cases
    wire			add_signextout;
    reg			branch_addsubtop;
@@ -115,7 +115,9 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg [15:0]		branch_C;
    reg [15:0]		branch_D;   
    wire [31:0]		br_O;
-
+   //wire			br_co;
+   //wire			br_accumco;
+*/
   // reg			br_sel; // 1 if ALUOut is 0.
 
    /*
@@ -169,7 +171,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.C_REG = 1'b0;
 
    // DSP for branch enable block
-  
+  /*
    SB_MAC16 branch_sbmac16_inst
    (
 	   .A(branch_A),
@@ -181,23 +183,24 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
 	   .ADDSUBTOP(branch_addsubtop),
 	   .ADDSUBBOT(branch_addsubbot),
 	   .SIGNEXTOUT(add_signextout),
-	   .CE(DEF),
-	   .IRSTTOP(DEF),
-	   .IRSTBOT(DEF),
-	   .ORSTTOP(DEF),
-	   .ORSTBOT(DEF),
-	   .AHOLD(DEF),
-	   .BHOLD(DEF),
-	   .CHOLD(DEF),
-	   .DHOLD(DEF),
+	   //.CE(CE),
+	   //.IRSTTOP(DEF),
+	   //.IRSTBOT(DEF),
+	   //.ORSTTOP(DEF),
+	   //.ORSTBOT(DEF),
+	   //.AHOLD(DEF),
+	   //.BHOLD(DEF),
+	   //.CHOLD(DEF),
+	   //.DHOLD(DEF),
 	   .OHOLDTOP(DEF),
 	   .OHOLDBOT(DEF),
 	   .OLOADTOP(DEF),
-	   .OLOADBOT(DEF),
-	   .CI(DEF),
-	   .ACCUMCI(DEF),
-	   .ACCUMCO(),
-	   .SIGNEXTIN(DEF)
+	   .OLOADBOT(DEF)
+	   //.CI(DEF),
+	   //.ACCUMCI(DEF),
+	   //.ACCUMCO(br_accumco),
+	   //.CO(br_co)
+	   //.SIGNEXTIN(DEF)
    );
 
    defparam branch_sbmac16_inst.B_SIGNED = 1'b0;
@@ -221,7 +224,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam branch_sbmac16_inst.B_REG = 1'b0;
    defparam branch_sbmac16_inst.A_REG = 1'b0;
    defparam branch_sbmac16_inst.C_REG = 1'b0;  
-
+*/
 
 // 16x16 multiplier, for SLL - low bits
 SB_MAC16 sb_mac16_mult1
@@ -819,13 +822,13 @@ srl_out = A >> B_lowerfive;
    end*/
 
    always @(ALUctl, ALUOut, A, B/*, br_O*/) begin
-	   branch_addsubtop <= 1;
+/*	   branch_addsubtop <= 1;
            branch_addsubbot <= 1;
 	   branch_C <= B [31:16];
 	   branch_B <= B [15:0];
 	   branch_A <= A [31:16];
 	   branch_D <= A [15:0];
-
+*/
 	   case (ALUctl[6:4])
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BEQ:	Branch_Enable =	(ALUOut == 0);
 	/*begin
@@ -834,11 +837,13 @@ srl_out = A >> B_lowerfive;
 	end*/
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BNE:	Branch_Enable = !(ALUOut == 0);
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLT:	//Branch_Enable = add_signextout;
-		Branch_Enable <= br_O[31] & 1'b1;
-		//Branch_Enable = ($signed(A) < $signed(B));
+		//Branch_Enable <= br_accumco;
+		//Branch_Enable <= br_O[31] & 1'b1;
+		Branch_Enable = ($signed(A) < $signed(B));
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGE:	//Branch_Enable = add_signextout ? 1'b0 : 1'b1;
-		Branch_Enable <= br_O[31] ^ 1'b1;
-		//Branch_Enable = ($signed(A) >= $signed(B));
+		//Branch_Enable <= br_co;
+		//Branch_Enable <= br_O[31] ^ 1'b1;
+		Branch_Enable = ($signed(A) >= $signed(B));
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BLTU:	//Branch_Enable <= add_signextout;
 		Branch_Enable = ($unsigned(A) < $unsigned(B));
 	`kSAIL_MICROARCHITECTURE_ALUCTL_6to4_BGEU:	//Branch_Enable <= add_signextout ? 1'b0 : 1'b1;
