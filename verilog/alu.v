@@ -105,7 +105,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    reg [31:0]		sll_two_power_n;
    //reg [31:0]		bit_rev_A;
    //reg [31:0]		bit_rev_srlout;
-   /*
+  /*
    // for branch enable cases
    wire			add_signextout;
    reg			branch_addsubtop;
@@ -117,9 +117,9 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    wire [31:0]		br_O;
    //wire			br_co;
    //wire			br_accumco;
-*/
-  // reg			br_sel; // 1 if ALUOut is 0.
 
+  // reg			br_sel; // 1 if ALUOut is 0.
+*/
    /*
    // Discarding higher bits of B for SRL, SRA, and SLL operations.
    reg	[4:0]		B_lowerfive;
@@ -171,7 +171,7 @@ module alu(ALUctl, A, B, ALUOut, Branch_Enable, clk);
    defparam i_sbmac16_addsub.C_REG = 1'b0;
 
    // DSP for branch enable block
-  /*
+/*
    SB_MAC16 branch_sbmac16_inst
    (
 	   .A(branch_A),
@@ -525,10 +525,10 @@ srl_out = A >> B_lowerfive;
 	 *	AND (the fields also match ANDI and LUI)
 	 */
 	
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	
-	begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_AND:	ALUOut = A & B;
+	/*begin
 		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? B[i] : 1'b0;
-	end
+	end*/ // This is the correct one!
 
 	/*begin
 		add_addsubtop <= 0;
@@ -572,8 +572,9 @@ srl_out = A >> B_lowerfive;
 	/*
 	 *	OR (the fields also match ORI)
 	 */
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	
-		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? 1'b1 : B[i];
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_OR:	ALUOut = A | B;
+		//for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? 1'b1 : B[i];
+		//the above is the correct one
 	/*begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
@@ -715,9 +716,10 @@ srl_out = A >> B_lowerfive;
 	 *	XOR (the fields also match other XOR variants)
 	 */
 
-	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	//ALUOut = {A[31:0] ? (~B[31:0]) : B[31:0]};
-		for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? (~B[i]) : B[i];
-	/*begin
+	`kSAIL_MICROARCHITECTURE_ALUCTL_3to0_XOR:	ALUOut = {A[31:0] ? (~B[31:0]) : B[31:0]};
+		//for (i=0; i<=31; i=i+1) ALUOut[i] = A[i] ? (~B[i]) : B[i];
+		// the above is the correct one
+		/*begin
 		add_addsubtop <= 0;
 		add_addsubbot <= 0;
 		add_C <= 32'b0;
