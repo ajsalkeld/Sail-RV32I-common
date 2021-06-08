@@ -38,7 +38,7 @@
 
 `include "../include/rv32i-defines.v"
 `include "../include/sail-core-defines.v"
-`include "sb_mac16_only.v" //simulation testing purposes
+//`include "sb_mac16_only.v" //simulation testing purposes
 
 /*
  *	Description:
